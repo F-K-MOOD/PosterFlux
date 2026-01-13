@@ -2,33 +2,62 @@
 import { LockOutlined, UserOutlined } from '@ant-design/icons-vue'
 import { Button, Col, Form, FormItem, Input, message, Row, Spin } from 'ant-design-vue'
 import type { Rule } from 'ant-design-vue/es/form/interface'
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onUnmounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { genVeriCode } from '@/api/user.ts'
-import useGlobalStore from '@/store/modules/global'
 import useUserStore from '@/store/modules/user'
 
 const userStore = useUserStore()
-const globalStore = useGlobalStore()
-const isLoginLoading = computed(() => globalStore.isLoading)
 const router = useRouter()
 
 // 获取验证码倒计时
-let timer = 0
+let verifyCodeTimer = 0
 const counter = ref(60)
 function startCounter() {
   counter.value--
-  timer = window.setInterval(() => {
-    counter.value--
+  verifyCodeTimer = window.setInterval(() => {
+    if (counter.value > 0) {
+      counter.value--
+    } else {
+      clearInterval(verifyCodeTimer)
+    }
   }, 1000)
 }
-// 倒计时复原
-watch(counter, (newValue) => {
-  if (newValue === 0) {
-    clearInterval(timer)
-    counter.value = 60
-  }
+
+// 跳转倒计时相关
+const redirectCountdown = ref(0) // 跳转倒计时秒数
+let redirectTimer = 0 // 跳转定时器
+const isRedirecting = ref(false) // 是否正在跳转中
+
+// 开始跳转倒计时
+function startRedirectCountdown(seconds: number = 3) {
+  isRedirecting.value = true
+  redirectCountdown.value = seconds
+
+  message.success(`登录成功，${seconds}秒后跳转首页`)
+
+  redirectTimer = window.setInterval(() => {
+    if (redirectCountdown.value > 1) {
+      redirectCountdown.value--
+      message.success(`登录成功，${redirectCountdown.value}秒后跳转首页`, 1)
+    } else {
+      clearInterval(redirectTimer)
+      router.push('/')
+    }
+  }, 1000)
+}
+
+// 手动立即跳转
+function redirectNow() {
+  clearInterval(redirectTimer)
+  router.push('/')
+}
+
+// 组件卸载时清理定时器
+onUnmounted(() => {
+  if (verifyCodeTimer) clearInterval(verifyCodeTimer)
+  if (redirectTimer) clearInterval(redirectTimer)
 })
 
 // 手机号不符合格式或者倒计时未结束, 获取验证码按钮显示为禁用
@@ -65,27 +94,23 @@ const rules = reactive({
 
 // 点击登录按钮时, 先进行表单的验证, 在发起请求
 const loginForm = ref()
-function login() {
-  loginForm.value.validate()
-    .then(async () => {
-      const payload = {
-        phoneNumber: form.cellphone,
-        verifyCode: form.verifyCode
-      }
-      //  发起登录请求, 获取token和用户信息
-      await userStore.loginAndFetch(payload)
-      message.success('登录成功 2秒后跳转首页')
-      setTimeout(() => {
-        router.push('/')
-      }, 2000)
-    })
-    .catch(errors => {
-      console.error('表单验证失败:', errors)
-      // 显示第一个验证错误
-      if (errors && errors.length > 0) {
-        message.error(errors[0].message)
-      }
-    })
+async function login() {
+  try {
+    await loginForm.value.validate()
+    const payload = {
+      phoneNumber: form.cellphone,
+      verifyCode: form.verifyCode
+    }
+    // 发起登录请求, 获取token和用户信息
+    await userStore.loginAndFetch(payload)
+    startRedirectCountdown(3) // 开始3秒倒计时
+  } catch (errors) {
+    console.error('表单验证失败:', errors)
+    // 显示第一个验证错误
+    if (errors && errors.length > 0) {
+      message.error(errors[0].message)
+    }
+  }
 }
 
 async function getCode(cellphone: string) {
@@ -131,10 +156,11 @@ async function getCode(cellphone: string) {
             </Input>
           </FormItem>
           <FormItem>
-            <Button type="primary" size="large" @click="login">
-              <template #icon>
-                <Spin :spinning="isLoginLoading" />
-              </template>
+            <Button 
+              type="primary" 
+              size="large" 
+              @click="login"
+            >
               登录
             </Button>
             <Button 
@@ -146,13 +172,40 @@ async function getCode(cellphone: string) {
               {{ counter === 60 ? '获取验证码' : `${counter}秒后重发` }}
             </Button>
           </FormItem>
+
+          <!-- 跳转倒计时提示区域 -->
+          <div v-if="isRedirecting" class="redirect-countdown">
+            <div class="countdown-info">
+              <Spin />
+              <span class="countdown-text">
+                {{ redirectCountdown }}秒后自动跳转...
+              </span>
+            </div>
+            <Button 
+              type="link" 
+              size="small" 
+              class="skip-button" 
+              @click="redirectNow"
+            >
+              立即跳转
+            </Button>
+            <!-- 可选：进度条 -->
+            <div class="progress-bar">
+              <div class="progress" :style="{ width: `${(redirectCountdown / 2) * 100}%` }" />
+            </div>
+          </div>
         </Form>
       </Col>
     </Row>
   </div>
 </template>
 
-<style>
+<style scoped>
+.login-page {
+  height: 100vh;
+  background-color: #f5f5f5;
+}
+
 .logo-area {
   position: absolute;
   top: 30px;
@@ -231,5 +284,148 @@ async function getCode(cellphone: string) {
 
 .icon-prefix {
   color: rgba(0, 0, 0, .25);
+}
+
+/* 跳转倒计时样式 */
+.redirect-countdown {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f6ffed;
+  border: 1px solid #b7eb8f;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.countdown-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.countdown-text {
+  color: #52c41a;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.skip-button {
+  color: #1890ff;
+}
+
+.skip-button:hover {
+  color: #40a9ff;
+}
+
+/* 修改原有样式中的Spin位置，避免干扰登录按钮 */
+.login-area .ant-btn .ant-spin {
+  position: static;
+  margin-right: 8px;
+}
+
+/* 进度条样式 */
+.progress-bar {
+  height: 4px;
+  background-color: #e8e8e8;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.progress {
+  height: 100%;
+  background-color: #52c41a;
+  transition: width 1s linear;
+}
+
+/* 按钮样式优化 */
+.login-area .ant-btn {
+  height: 45px;
+  font-size: 16px;
+  border-radius: 6px;
+}
+
+.login-area .ant-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+  transition: all 0.3s ease;
+}
+
+.login-area .ant-btn-primary:hover {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  border-color: #5a67d8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.login-area .ant-btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 输入框焦点样式优化 */
+.login-area .ant-input:focus,
+.login-area .ant-input:hover {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+/* 响应式适配 */
+@media (max-width: 992px) {
+
+  .aside,
+  .login-area {
+    width: 100%;
+    min-height: 50vh;
+  }
+
+  .aside .pf-img {
+    max-height: 300px;
+    object-fit: contain;
+  }
+
+  .aside h2,
+  .login-area h2 {
+    font-size: 24px;
+  }
+
+  .login-area .ant-form {
+    width: 300px;
+    padding: 0 20px;
+  }
+}
+
+@media (max-width: 576px) {
+  .login-area .ant-form {
+    width: 280px;
+  }
+
+  .aside h2,
+  .login-area h2 {
+    font-size: 20px;
+  }
+
+  .login-area .subTitle {
+    font-size: 16px;
+  }
+
+  .login-area .ant-input {
+    font-size: 15px;
+    padding: 15px 40px 15px 20px;
+  }
+
+  .login-area .ant-btn {
+    height: 40px;
+    font-size: 14px;
+  }
+
+  .redirect-countdown {
+    padding: 10px;
+  }
+
+  .countdown-text {
+    font-size: 14px;
+  }
 }
 </style>

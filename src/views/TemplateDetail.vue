@@ -12,7 +12,7 @@ import { downloadImage, } from '@/utils'
 const route = useRoute()
 const templateStore = useTemplateStore()
 const currentId = route.params.id as string
-console.log(currentId)
+
 
 // 主动获取模板详情
 onMounted(async () => {

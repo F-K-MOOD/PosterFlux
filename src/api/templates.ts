@@ -33,11 +33,18 @@ export function fetchWork(id: string) {
   })
 }
 
-export function editorSaveWorkAPI(payload: { title: string; content: { props: Record<string, any>; components: ComponentData[] } },id:string) {
+export function editorSaveWorkAPI(payload: { title?: string;coverImg?: string; desc?: string; content?: { props?: Record<string, any>; components?: ComponentData[] } }, id: string) {
   return service({
     url: `/works/${id}`,
     method: 'patch',
     data: payload
+  })
+}
+
+export function publishWork(id: string) {
+  return service({
+    url: `/works/publish/${id}`,
+    method: 'post',
   })
 }
 

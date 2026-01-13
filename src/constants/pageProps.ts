@@ -1,1 +1,1 @@
-export const pageProps = { backgroundColor: '#d09b9bff', backgroundImage: "url('https://pf-server.oss-cn-beijing.aliyuncs.com/%E9%A9%AC%E5%B9%B4.jpeg')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', height: '560px' }
+export const pageProps = { backgroundColor: '', backgroundImage: "url('')", backgroundRepeat: 'no-repeat', backgroundSize: 'cover', height: '560px' }

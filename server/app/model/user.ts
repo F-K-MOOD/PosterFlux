@@ -1,7 +1,8 @@
 import { Application } from 'egg'
-import { Schema } from 'mongoose'
+import { Schema, Document, Model } from 'mongoose'
 import * as AutoIncrementFactory from 'mongoose-sequence'
-export interface UserProps {
+
+export interface UserProps extends Document {
   username: string;
   password: string;
   email?: string;
@@ -16,11 +17,17 @@ export interface UserProps {
   role?: 'admin' | 'normal';
   description?: string;
   gender?: string;
+  works: string[];
 }
 
+type UserModel = Model<UserProps>
+
 function initUserModel(app: Application) {
-  const AutoIncrement = AutoIncrementFactory(app.mongoose)
-  const UserSchema = new Schema<UserProps>({
+  const mongoose = app.mongoose
+  const AutoIncrement = AutoIncrementFactory(mongoose)
+
+  // 使用Schema构造函数但不指定泛型，避免类型检查问题
+  const UserSchema = new mongoose.Schema({
     username: { type: String, unique: true, required: true },
     password: { type: String },
     nickName: { type: String },
@@ -32,7 +39,8 @@ function initUserModel(app: Application) {
     oauthID: { type: String },
     role: { type: String, default: 'normal' },
     description: { type: String },
-    gender: { type: String }
+    gender: { type: String },
+    works: { type: [mongoose.Schema.Types.ObjectId], ref: 'Work', default: [] }
   }, {
     timestamps: true
   })
@@ -58,8 +66,11 @@ function initUserModel(app: Application) {
       }
     }
   })
+
   UserSchema.plugin(AutoIncrement, { inc_field: 'id', id: 'users_id_counter' })
-  return app.mongoose.model('User', UserSchema) as any
+
+  // 使用mongoose.model直接创建模型，不使用类型断言
+  return mongoose.model<UserProps>('User', UserSchema)
 }
 
 export default initUserModel

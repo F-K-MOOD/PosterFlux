@@ -7,9 +7,9 @@ export type AllFormProps = PageProps & AllComponentProps
 
 export interface EditorProps {
   // 供中间编译器渲染的数组
-  components: ComponentData[]; 
+  components: ComponentData[];
   // 当前选中的元素 uuid
-  currentElement: string; 
+  currentElement: string;
   page: PageData;
   // 当前被复制的组件
   copiedComponent?: ComponentData;
@@ -22,9 +22,9 @@ export interface EditorProps {
   // 保存最多历史条目记录数
   maxHistoryNumber: number;
   // 数据是否有修改
-  // isDirty: boolean;
-  // 当前 work 的 channels
-  // channels: ChannelProps[];
+  isDirty: boolean;
+  // 当前作品ID
+  workId?: string;
 }
 export interface ComponentData {
   // 这个元素的 属性，
@@ -57,7 +57,7 @@ export interface PageData {
   desc?: string;
   coverImg?: string;
   uuid?: string;
-  setting?: { [key: string]: any };
+  setting?: Record<string, any>;
   isTemplate?: boolean;
   isHot?: boolean;
   isNew?: boolean;
@@ -70,13 +70,9 @@ export interface PageData {
     picture: string;
     userName: string;
   };
+  templateId?: string;
 }
-export interface ChannelProps {
-  id: number;
-  name: string;
-  workId: number;
-  status: number;
-}
+
 export interface PageProps {
   backgroundColor?: string;
   backgroundImage?: string;

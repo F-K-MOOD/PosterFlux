@@ -6,6 +6,7 @@ axios
 cellnumber
 commitlint
 cropperjs
+DASHSCOPE
 dysmsapi
 filemanager
 Heiti
@@ -25,4 +26,5 @@ STFangsong
 unplugin
 uuidv4
 veri
+VITE
 vuedraggable

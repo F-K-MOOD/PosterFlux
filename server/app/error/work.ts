@@ -18,5 +18,9 @@ export const workErrorMessages = {
   channelOperateFail: {
     errno: 102005,
     message: '频道操作失败',
+  },
+  workNotFoundFail: {
+    errno: 102006,
+    message: '作品不存在',
   }
 }

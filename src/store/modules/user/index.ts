@@ -41,20 +41,17 @@ const userStore = defineStore('user', () => {
   async function loginAndFetch(payload: { phoneNumber: string; verifyCode: string }) {
     // 发送请求获取token
     const loginResp = await LoginByPhoneNumber(payload)
-    console.log('Login response:', loginResp)
     const { token } = loginResp.data.data
     // 将token存储到state和localStorage中
     state.token = token
     localStorage.setItem('token', token)
     // 设置axios默认headers
     axios.defaults.headers.common.Authorization = `Bearer ${token}`
-    console.log('Token stored:', token)
     // 发送请求获取用户信息
     const userInfo = await GetUserInfo()
     // 将用户信息存储到state中
     state.isLogin = true
     state.data = userInfo.data.data
-    console.log('User info:', state.data)
   }
 
   return {

@@ -6,4 +6,6 @@ export { getImageDimensions } from './getImageDimensions'
 export { getParentElement } from './getParentElement'
 export { insertAt } from './insertAt'
 export { default as request } from './request'
+export { takeScreenshotAndUpload } from './takeScreenshotAndUpload'
+export { timeout } from './timeout'
 

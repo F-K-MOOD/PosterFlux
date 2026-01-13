@@ -8,7 +8,6 @@
         v-if="!isLastPage" 
         type="primary" 
         size="large" 
-        :loading="isLoading"
         @click="loadMorePage"
       >
         加载更多
@@ -32,6 +31,12 @@ const total = computed(() => templateStore.state.totalTemplates)
 const { loadMorePage, isLastPage } = useLoadMore('fetchTemplates', total, { pageIndex: 0, pageSize: 8 })
 onMounted(() => {
   templateStore.fetchTemplates({ pageIndex: 0, pageSize: 8 })
+  // 前端检测是否滚动到底部,然后无限自动加载, 而且还要在到达底部之前就要加载更多数据
+  window.addEventListener('scroll', () => {
+    if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 100) {
+      loadMorePage()
+    }
+  })
 })
 </script>
 
