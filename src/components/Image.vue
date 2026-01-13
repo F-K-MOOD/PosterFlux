@@ -47,6 +47,7 @@ const { styleProps, handleClick } = useComponentCommon(props, imageStylePropsNam
     :style="styleProps" 
     class="pf-image-component" 
     :src="src" 
+    crossOrigin="anonymous" 
     @click.prevent="handleClick"
   >
 </template>

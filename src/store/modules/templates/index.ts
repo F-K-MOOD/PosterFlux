@@ -22,11 +22,8 @@ const useTemplateStore = defineStore('templateStore', () => {
     state.data = [rawData.data]
   }
   async function fetchTemplates(params: { title?: string; pageIndex: number; pageSize: number }) {
-    console.log('Fetching templates with params:', params)
     const resp = await fetchTemplatesApi(params)
-    console.log('API Response:', resp)
     const { count, list } = resp.data.data
-    console.log('Templates list from backend:', list)
 
     // 如果是第一页，替换数据；否则追加数据
     if (params.pageIndex === 0) {
@@ -34,9 +31,7 @@ const useTemplateStore = defineStore('templateStore', () => {
     } else {
       state.data = [...state.data, ...list]
     }
-
     state.totalTemplates = count
-    console.log('Updated template state:', state)
   }
 
   async function fetchWork(id: string) {
@@ -47,7 +42,7 @@ const useTemplateStore = defineStore('templateStore', () => {
 
   async function fetchWorks(params: { title?: string; status?: number; pageIndex: number; pageSize: number }) {
     const data = await fetchWorksApi(params)
-    console.log('Works:', data)
+    console.log(data)
     // const { count, list } = rawData.data
     // state.works = list
     // state.totalWorks = count

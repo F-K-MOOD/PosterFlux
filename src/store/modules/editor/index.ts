@@ -4,10 +4,12 @@ import { defineStore } from 'pinia'
 import { v4 as uuidv4 } from 'uuid'
 import { computed, reactive } from 'vue'
 
-import { editorSaveWorkAPI,fetchWork as editorFetchWorkAPI } from '@/api/templates'
+import { editorSaveWorkAPI, fetchWork as editorFetchWorkAPI } from '@/api/templates'
+import { publishWork as publishWorkAPI } from '@/api/templates'
 import { pageProps } from '@/constants/pageProps'
 // import { textComponentProps } from '@/constants/textComponentProps'
 import debounce from '@/utils/debounce'
+import { imageUrlToBase64 } from '@/utils/imageUrlToBase64'
 import { insertAt } from '@/utils/insertAt'
 
 import type { ComponentData, EditorProps, HistoryRecord, PageProps } from './helper'
@@ -29,6 +31,7 @@ export const useEditorStore = defineStore('editor', () => {
     histories: [] as HistoryRecord[],
     historyIndex: -1,
     maxHistoryNumber: 5,
+    isDirty: false,
   })
   //* 物料区
   // 物料区添加物料   添加历史记录
@@ -49,6 +52,7 @@ export const useEditorStore = defineStore('editor', () => {
       type: 'add',
       data: cloneDeep(newComponent)
     })
+    state.isDirty = true
   }
 
   //? 画布区
@@ -81,6 +85,7 @@ export const useEditorStore = defineStore('editor', () => {
             },
           }
         })
+        state.isDirty = true
         return {
           ...item,
           props: {
@@ -100,8 +105,8 @@ export const useEditorStore = defineStore('editor', () => {
   //! 右侧配置区
   // 右侧配置区 更新组件属性
   function updateComponent(data: ComponentData) {
-    const { id, isHidden, isLocked, layerName,isRoot, props, page } = data
-    if(page) {
+    const { id, isHidden, isLocked, layerName, isRoot, props, page } = data
+    if (page) {
       state.page = page
     }
     let component: ComponentData | undefined
@@ -146,6 +151,7 @@ export const useEditorStore = defineStore('editor', () => {
         return item
       }
     })
+    state.isDirty = true
   }
   // 右侧配置区 更新图层顺序
   function updateComponentList(list: ComponentData[]) {
@@ -153,13 +159,22 @@ export const useEditorStore = defineStore('editor', () => {
     // 无需添加历史记录
   }
   // 右侧配置区 更新页面属性
-  function updatePage(data: { key: keyof PageProps; value: any }) {
-    const { key, value } = data
-    state.page.props = {
-      ...state.page.props || {},
-      [key]: value
-    } as PageProps
-    // 无需添加历史记录
+  function updatePage(data: { key: string; value: any; isRoot?: boolean }) {
+    const { key, value, isRoot } = data
+    if (isRoot) {
+      state.page = {
+        ...state.page || {},
+        [key]: value
+      }
+    } else {
+      state.page.props = {
+        ...state.page.props || {},
+        [key]: value
+      } as PageProps
+      state.isDirty = true
+      // 无需添加历史记录
+    }
+
   }
 
   // 处理热键
@@ -186,6 +201,7 @@ export const useEditorStore = defineStore('editor', () => {
         data: cloneDeep(cloneComponent)
       })
       message.success('已粘贴当前图层', 1)
+      state.isDirty = true
     }
   }
   // 删除组件,backspace,delete
@@ -195,6 +211,7 @@ export const useEditorStore = defineStore('editor', () => {
       const currentIndex = state.components.findIndex((item) => item.id === component.id)
       state.components = state.components.filter((item) => item.id !== component.id)
       // 添加历史记录
+      state.isDirty = true
       pushHistory(state, {
         id: uuidv4(),
         index: currentIndex,
@@ -255,6 +272,7 @@ export const useEditorStore = defineStore('editor', () => {
       default:
         break
     }
+    state.isDirty = true
   }
   // 重做
   function redo() {
@@ -277,6 +295,7 @@ export const useEditorStore = defineStore('editor', () => {
       default:
         break
     }
+    state.isDirty = true
     state.historyIndex++
   }
   function modifyHistory(state: EditorProps, history: HistoryRecord, type: 'undo' | 'redo') {
@@ -325,26 +344,30 @@ export const useEditorStore = defineStore('editor', () => {
     state.histories.push(history)
   }
 
-
   // 获取Editor组件需要展示的模板数据
   async function fetchTemplateForEditor(id: string) {
     try {
       const response = await editorFetchWorkAPI(id)
-      console.log('response', response)
-      const { content,coverImg,  } = response.data.data
+      console.log('fetchTemplateForEditor', response)
+      const { content, coverImg,uuid } = response.data.data
+      // 根据id拿到了模版, 但是拿到模版后,用户自定义模版变成自己的作品, 所以需要生成一个新的workId
+      if(state.workId) {
+        state.workId = uuidv4()
+      }
+      // 转换为Base64
+      const base64CoverImg = await imageUrlToBase64(coverImg)
       if (content) {
         // 从content.page.props中获取页面属性
         if (content.page && content.page.props) {
-          const backgroundImage =  `url(${coverImg})`
+          state.page.uuid = uuid
           state.page.props = {
             ...state.page.props,
-            backgroundImage
+            backgroundImage: `url(${base64CoverImg})`,
           }
         }
         // 从content.components中获取组件列表
         if (content.components) {
           state.components = content.components
-          console.log('content.components', content.components)
           // 自动激活第一个组件
           if (content.components.length > 0) {
             state.currentElement = content.components[0].id
@@ -358,16 +381,33 @@ export const useEditorStore = defineStore('editor', () => {
   }
 
   // 保存模板
-  async function saveAsTemplate(id: string) {
-    const payload = {
-      title: state.page.title || '未命名作品',
-      content: {
-        props: state.page.props || {},
-        components: state.components
-      },
+  async function saveAsWork(payload: { title?: string; coverImg?: string; desc?: string; content?: { props?: Record<string, any>; components?: ComponentData[] }; templateId?: string }) {
+    if (!state.isDirty) {
+      message.warning('当前无修改内容', 1)
+      return
     }
-    await editorSaveWorkAPI(payload, id)
-    message.success('保存成功')
+    // 如果没有workId，生成一个新的；否则使用已有的
+    const workId = state.workId || uuidv4()
+    // 确保传递完整的 content 数据给 API
+    const savePayload = {
+      ...payload,
+      // 如果没有明确指定templateId，从page中获取
+      templateId: payload.templateId || state.page.templateId
+    }
+    await editorSaveWorkAPI(savePayload, workId)
+    // 更新state中的workId，确保后续保存使用同一个ID
+    state.workId = workId
+    message.success('保存成功', 2)
+    state.isDirty = false
+  }
+
+  async function publishWork(id: string) {
+    await publishWorkAPI(id)
+  }
+
+  // 更新workId
+  function updateWorkId(id: string) {
+    state.workId = id
   }
   return {
     state,
@@ -389,6 +429,8 @@ export const useEditorStore = defineStore('editor', () => {
     redoIsDisabled,
     pushHistory,
     fetchTemplateForEditor,
-    saveAsTemplate
+    saveAsWork,
+    publishWork,
+    updateWorkId
   }
 })

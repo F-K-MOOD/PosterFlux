@@ -24,7 +24,11 @@ export default class WorkService extends Service {
       author: username,
       uuid
     }
-    return ctx.model.Work.create(newEmptyWork)
+    // 创建新作品
+    const createdWork = await ctx.model.Work.create(newEmptyWork)
+    // 将作品ID添加到用户的works数组中
+    await ctx.model.User.findByIdAndUpdate(_id, { $push: { works: createdWork._id } })
+    return createdWork
   }
   async copyWork(wid: number) {
     const { ctx } = this
@@ -45,9 +49,13 @@ export default class WorkService extends Service {
       title: `${title}-复制`,
       desc,
       content,
-      isTemplate: false
+      isTemplate: false,
+      templateId: copiedWork._id.toString()
     }
+    // 创建新作品
     const res = await ctx.model.Work.create(newWork)
+    // 将作品ID添加到用户的works数组中
+    await ctx.model.User.findByIdAndUpdate(_id, { $push: { works: res._id } })
     await ctx.model.Work.findOneAndUpdate({ id }, {
       copiedCount: copiedCount + 1,
     })
@@ -63,7 +71,7 @@ export default class WorkService extends Service {
       .limit(pageSize)
       .sort(customSort)
       .lean()
-    
+
     // 手动转换数据格式，确保返回id字段而不是_id字段
     const transformedRes = res.map(item => {
       const transformedItem = { ...item }
@@ -76,7 +84,7 @@ export default class WorkService extends Service {
       delete transformedItem.__v
       return transformedItem
     })
-    
+
     const count = await this.ctx.model.Work.find(find).countDocuments()
     return { count, list: transformedRes, pageSize, pageIndex }
   }

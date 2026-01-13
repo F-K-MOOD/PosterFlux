@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { Button,Empty, Layout, LayoutContent, LayoutHeader, LayoutSider, Menu, MenuItem ,TabPane, Tabs, Textarea} from 'ant-design-vue'
-import { computed, onMounted, ref } from 'vue'
+import { Button, Empty, Layout, LayoutContent, LayoutHeader, LayoutSider, Menu, MenuItem, Modal, TabPane, Tabs, Textarea } from 'ant-design-vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 import PosterFluxLogo from '@/assets/PosterFlux.png'
@@ -11,6 +11,8 @@ import LayerList from '@/components/LayerList.vue'
 import Text from '@/components/Text.vue'
 import UserProfile from '@/components/UserProfile.vue'
 import defaultTextTemplates from '@/constants/defaultTemplates'
+import usePublishWork from '@/hooks/usePublishWork'
+import useSaveWork from '@/hooks/useSaveWork'
 import initContextMenu from '@/plugins/contextMenu'
 import initHotKeys from '@/plugins/hotKeys'
 import { useEditorStore } from '@/store/modules/editor';
@@ -20,10 +22,11 @@ import useUserStore from '@/store/modules/user'
 import ComponentsList from './components/ComponentsList.vue'
 import EditWrapper from './components/EditWrapper.vue'
 import HistoryArea from './components/HistoryArea.vue'
+import PreviewForm from './components/PreviewForm.vue'
 import PropsTable from './components/PropsTable.vue'
+import PublishForm from './components/PublishForm.vue'
 
 export type TabType = 'component' | 'layer' | 'page'
-
 defineOptions({
   name: 'Editor',
   components: {
@@ -96,6 +99,8 @@ function handleUpdatePosition(data: { id: string; left?: string; top?: string; w
 initHotKeys()
 // 初始化鼠标右键点击画布, 显示右键菜单
 initContextMenu()
+// 保存模板
+const { saveWork } = useSaveWork()
 
 // 从路由参数中获取模板ID
 const route = useRoute()
@@ -114,19 +119,47 @@ const userInfo = computed(() => user.state)
 // 修改页面标题
 function titleChange(title: string) {
   const page = editorStore.state.page
-  editorStore.updateComponent({ 
-    isRoot: true, 
-    page: { ...page, title } 
+  editorStore.updateComponent({
+    isRoot: true,
+    page: { ...page, title }
   } as ComponentData)
 }
-// 保存模板
-function saveAsTemplate() {
-  editorStore.saveAsTemplate(currentWorkId.value as string)
+
+const canvasFix = ref(false)
+const showPublishForm = ref(false)
+const showPreviewForm = ref(false)
+const { publishWork } = usePublishWork()
+async function publish() {
+  setActive('')
+  const el = document.getElementById('canvas-area') as HTMLElement
+  canvasFix.value = true
+  await nextTick()
+  try {
+    await publishWork(el)
+    showPublishForm.value = true
+  } catch (e) {
+    console.error(e)
+  } finally {
+    canvasFix.value = false
+  }
+}
+async function preview() {
+  await saveWork()
+  showPreviewForm.value = true
 }
 </script>
 
 <template>
   <div class="editor-container">
+    <Modal 
+      v-model:open="showPublishForm" 
+      title="发布成功" 
+      width="700px" 
+      :footer="null"
+    >
+      <publish-form />
+    </Modal>
+    <preview-form v-if="showPreviewForm" v-model:visible="showPreviewForm" />
     <Layout>
       <LayoutHeader class="header">
         <div class="page-title">
@@ -142,16 +175,16 @@ function saveAsTemplate() {
           :style="{ lineHeight: '64px' }"
         >
           <MenuItem key="1">
-            <Button type="primary">预览和设置</Button>
+          <Button type="primary" @click="preview">预览和设置</Button>
           </MenuItem>
           <MenuItem key="2">
-            <Button type="primary" @click="saveAsTemplate">保存</Button>
+          <Button type="primary" @click="saveWork">保存</Button>
           </MenuItem>
           <MenuItem key="3">
-            <Button type="primary" @click="() =>{}">发布</Button>
+          <Button type="primary" @click="publish">发布</Button>
           </MenuItem>
           <MenuItem key="4">
-            <user-profile :user="userInfo" />
+          <user-profile :user="userInfo" />
           </MenuItem>
         </Menu>
       </LayoutHeader>
@@ -168,21 +201,22 @@ function saveAsTemplate() {
         <LayoutContent class="preview-container">
           <p>画布区域</p>
           <HistoryArea />
-          <div id="canvas-area" class="preview-list" :style="page.props">
+          <div 
+            id="canvas-area" 
+            class="preview-list" 
+            :style="page.props" 
+            :class="{ 'canvas-fix': canvasFix }"
+          >
             <EditWrapper 
               v-for="component in components" 
               :id="component.id" 
-              :key="component.id"
-              :props="component.props" 
-              :active="!!activeComponent && activeComponent.id === component.id"
-              @set-active="setActive" 
+              :key="component.id" 
+              :props="component.props"
+              :active="!!activeComponent && activeComponent.id === component.id" 
+              @set-active="setActive"
               @update-position="handleUpdatePosition"
             >
-              <component
-                :is="component.name" 
-                v-bind="component.props"
-                v-if="component.name" 
-              />
+              <component :is="component.name" v-bind="component.props" v-if="component.name" />
             </EditWrapper>
           </div>
         </LayoutContent>
@@ -192,7 +226,7 @@ function saveAsTemplate() {
         <Tabs v-model:activeKey="activePanel" type="card">
           <TabPane key="component" tab="属性设置" class="no-top-radius">
             <div v-if="activeComponent">
-              <edit-group 
+              <edit-group
                 v-if="!activeComponent.isLocked" 
                 :props="activeComponent.props"
                 @change="handleChangeComponentProps" 
@@ -216,7 +250,10 @@ function saveAsTemplate() {
             />
           </TabPane>
           <TabPane key="page" tab="页面设置">
-            <PropsTable :props="page.props" @change="pageChange" />
+            <PropsTable 
+              :props="page.props" 
+              @change="pageChange" 
+            />
           </TabPane>
         </Tabs>
       </LayoutSider>

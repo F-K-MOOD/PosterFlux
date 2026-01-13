@@ -90,7 +90,12 @@ const handleDelete = () => {
       @cancel="showModal = false"
     >
       <div class="image-cropper">
-        <img id="processed-image" ref="cropperImg" :src="baseImageUrl">
+        <img 
+          id="processed-image" 
+          ref="cropperImg" 
+          :src="baseImageUrl" 
+          crossOrigin="anonymous"
+        >
       </div>
     </Modal>
     <div class="image-preview" :style="{ backgroundImage: backgroundUrl }" :class="{ 'extraHeight': showDelete }" />
