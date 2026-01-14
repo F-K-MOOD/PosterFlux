@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { Avatar, Button, Col, Row } from 'ant-design-vue'
 import { computed, nextTick, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -41,15 +40,15 @@ function downloadTemplate() {
 
 <template>
   <div class="work-detail-container">
-    <Row v-if="template" type="flex" justify="center">
-      <Col :span="8" class="cover-img">
+    <ARow v-if="template" type="flex" justify="center">
+      <ACol :span="8" class="cover-img">
         <a :href="template.coverImg"><img id="cover-img" :src="template.coverImg" alt=""></a>
-      </Col>
-      <Col :span="8">
+      </ACol>
+      <ACol :span="8">
         <h2>{{ template.title }}</h2>
         <p>{{ template.desc }}</p>
         <div class="author">
-          <Avatar>V</Avatar>
+          <AAvatar>V</AAvatar>
           该模版由 <b>{{ template.author }}</b> 创作
         </div>
         <div class="bar-code-area">
@@ -65,16 +64,16 @@ function downloadTemplate() {
               }
             }"
           >
-            <Button type="primary" size="large">
+            <AButton type="primary" size="large">
               使用模版
-            </Button>
+            </AButton>
           </router-link>
-          <Button size="large" @click="downloadTemplate">
+          <AButton size="large" @click="downloadTemplate">
             下载图片海报
-          </Button>
+          </AButton>
         </div>
-      </Col>
-    </Row>
+      </ACol>
+    </ARow>
   </div>
 </template>
 

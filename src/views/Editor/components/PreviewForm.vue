@@ -1,15 +1,13 @@
 <script lang="ts" setup>
 import type { FormInstance } from 'ant-design-vue'
-import {Button, Col, Drawer,Form,FormItem,Input,Row} from 'ant-design-vue'
 import type { Rule } from 'ant-design-vue/es/form'
 import { forEach } from 'lodash-es'
-import {  computed, onMounted,reactive,ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 
 import StyledUploader from '@/components/StyledUploader.vue'
 import useSaveWork from '@/hooks/useSaveWork'
 import { useEditorStore } from '@/store/modules/editor'
 import { generateQRCode, timeout } from '@/utils'
-
 
 // 定义props 与 emits
 interface PreviewFormProps {
@@ -37,7 +35,7 @@ const rules: Record<string, Rule[]> = {
     { required: true, message: '描述不能为空', trigger: 'blur' }
   ]
 }
-    
+
 onMounted(async () => {
   try {
     await timeout(100)
@@ -84,12 +82,12 @@ const onCancel = () => {
             width="375" 
             frameborder="0" 
             class="iframe-placeholder"
-            :height="(pageState.props && pageState.props.height) ? pageState.props.height : '560'"
+            :height="(pageState.props && pageState.props.height) ? pageState.props.height : '560'" 
           />
         </div>
       </div>
     </div>
-    <Drawer 
+    <ADrawer 
       title="设置面板" 
       placement="right" 
       width="400" 
@@ -98,51 +96,51 @@ const onCancel = () => {
       @close="onCancel"
     >
       <div class="publish-form-container">
-        <Row type="flex" align="middle" :style="{ marginBottom: '20px' }">
-          <Col :span="6">
+        <ARow type="flex" align="middle" :style="{ marginBottom: '20px' }">
+          <ACol :span="6">
             扫码预览：
-          </Col>
-          <Col :span="10">
+          </ACol>
+          <ACol :span="10">
             <canvas id="preview-barcode-container" />
-          </Col>
-        </Row>
-        <Row type="flex" align="middle" :style="{ marginBottom: '20px' }">
-          <Col :span="6">
+          </ACol>
+        </ARow>
+        <ARow type="flex" align="middle" :style="{ marginBottom: '20px' }">
+          <ACol :span="6">
             上传封面：
-          </Col>
-          <Col :span="10">
+          </ACol>
+          <ACol :span="10">
             <StyledUploader 
               text="上传封面" 
               :uploaded="form.uploaded" 
               show-uploaded 
-              @success="updateAvatar"
+              @success="updateAvatar" 
             />
-          </Col>
-        </Row>
-        <Form 
-          ref="refForm"
+          </ACol>
+        </ARow>
+        <AForm 
+          ref="refForm" 
           :label-col="{ span: 6 }" 
           :wrapper-col="{ span: 16 }" 
           :model="form" 
           :rules="rules"
         >
-          <FormItem label="标题" required name="title">
-            <Input v-model:value="form.title" />
-          </FormItem>
-          <FormItem label="描述" required name="desc">
-            <Input v-model:value="form.desc" />
-          </FormItem>
-          <FormItem :wrapper-col="{ span: 18, offset: 4 }">
-            <Button type="primary" style="margin-left: 10px;" @click="validateAndSave">
+          <AFormItem label="标题" required name="title">
+            <AInput v-model:value="form.title" />
+          </AFormItem>
+          <AFormItem label="描述" required name="desc">
+            <AInput v-model:value="form.desc" />
+          </AFormItem>
+          <AFormItem :wrapper-col="{ span: 18, offset: 4 }">
+            <AButton type="primary" class="submit-button" @click="validateAndSave">
               保存
-            </Button>
-            <Button style="margin-left: 10px;" @click="onCancel">
+            </AButton>
+            <AButton class="cancel-button" @click="onCancel">
               取消
-            </Button>
-          </FormItem>
-        </Form>
+            </AButton>
+          </AFormItem>
+        </AForm>
       </div>
-    </Drawer>
+    </ADrawer>
   </div>
 </template>
 
@@ -159,6 +157,7 @@ const onCancel = () => {
   align-items: center;
   justify-content: center;
 }
+
 .final-preview-inner {
   width: 430px;
   height: 870px;
@@ -174,25 +173,37 @@ const onCancel = () => {
   text-align: center;
   font-weight: bold;
 }
+
 .iframe-container {
   width: 100%;
   height: 706px;
   overflow-y: auto;
   overflow-x: hidden;
 }
-.iframe-placeholder
-{
-   background: url('@/assets/loading.svg') 50% 50% no-repeat;
-   background-size: 50px;
+
+.iframe-placeholder {
+  background: url('@/assets/loading.svg') 50% 50% no-repeat;
+  background-size: 50px;
 }
+
 .publish-form-container .file-upload-container {
   height: 130px;
 }
+
 .publish-form-container .ant-form-item-label {
   text-align: left;
 }
+
 #preview-barcode-container {
   border: 2px dotted #efefef;
   padding: 10px;
+}
+
+.submit-button {
+  margin-left: 10px;
+}
+
+.cancel-button {
+  margin-left: 10px;
 }
 </style>

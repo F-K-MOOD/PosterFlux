@@ -1,0 +1,79 @@
+import {
+  Avatar,
+  Button,
+  Card,
+  CardMeta,
+  Col,
+  Collapse,
+  CollapsePanel,
+  Drawer,
+  Empty,
+  Form,
+  FormItem,
+  Input,
+  InputNumber,
+  Layout,
+  LayoutContent,
+  LayoutFooter,
+  LayoutHeader,
+  LayoutSider,
+  Menu,
+  MenuItem,
+  Modal,
+  RadioButton,
+  RadioGroup,
+  Row,
+  Select,
+  SelectOption,
+  Slider,
+  Spin,
+  TabPane,
+  Tabs,
+  Textarea,
+  Tooltip
+} from 'ant-design-vue'
+import type { App } from 'vue'
+
+const components = [
+  Avatar,
+  Button,
+  Card,
+  CardMeta,
+  Col,
+  Collapse,
+  CollapsePanel,
+  Drawer,
+  Empty,
+  Form,
+  FormItem,
+  Input,
+  InputNumber,
+  Layout,
+  LayoutContent,
+  LayoutFooter,
+  LayoutHeader,
+  LayoutSider,
+  Menu,
+  MenuItem,
+  Modal,
+  RadioButton,
+  RadioGroup,
+  Row,
+  Select,
+  SelectOption,
+  Slider,
+  Spin,
+  TabPane,
+  Tabs,
+  Textarea,
+  Tooltip
+]
+
+export default {
+  install(app: App) {
+    components.forEach((component) => {
+      // 只注册组件的原始名称（带A前缀）
+      app.component(component.name, component)
+    })
+  },
+}

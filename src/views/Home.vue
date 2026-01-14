@@ -1,23 +1,22 @@
 <template>
   <div class="content-container">
-    <Row :gutter="16">
+    <ARow :gutter="16">
       <template-list :list="testData" />
-    </Row>
-    <Row type="flex" justify="center">
-      <Button 
+    </ARow>
+    <ARow type="flex" justify="center">
+      <AButton 
         v-if="!isLastPage" 
         type="primary" 
         size="large" 
         @click="loadMorePage"
       >
         加载更多
-      </Button>
-    </Row>
+      </AButton>
+    </ARow>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { Button, Row } from 'ant-design-vue'
 import { computed, onMounted } from 'vue'
 
 import useLoadMore from '@/hooks/useLoadMore'

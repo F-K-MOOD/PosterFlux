@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { LockOutlined, UserOutlined } from '@ant-design/icons-vue'
-import { Button, Col, Form, FormItem, Input, message, Row, Spin } from 'ant-design-vue'
+import { message } from 'ant-design-vue'
 import type { Rule } from 'ant-design-vue/es/form/interface'
 import { computed, onUnmounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -123,17 +123,17 @@ async function getCode(cellphone: string) {
 
 <template>
   <div class="login-page">
-    <Row>
-      <Col :span="12" class="aside">
+    <ARow>
+      <ACol :span="12" class="aside">
         <div class="aside-inner">
           <router-link to="/">
             <img alt="FK-PosterFlux" src="../assets/login.png" class="pf-img">
           </router-link>
           <h2>欢迎使用PosterFlux</h2>
         </div>
-      </Col>
-      <Col :span="12" class="login-area">
-        <Form 
+      </ACol>
+      <ACol :span="12" class="login-area">
+        <AForm 
           ref="loginForm" 
           layout="vertical" 
           :model="form" 
@@ -141,37 +141,37 @@ async function getCode(cellphone: string) {
         >
           <h2>欢迎回来</h2>
           <p class="subTitle">使用手机号码和验证码登录</p>
-          <FormItem label="手机号码" required name="cellphone">
-            <Input v-model:value="form.cellphone" placeholder="手机号码">
+          <AFormItem label="手机号码" required name="cellphone">
+            <AInput v-model:value="form.cellphone" placeholder="手机号码">
               <template #prefix>
                 <UserOutlined class="icon-prefix" />
               </template>
-            </Input>
-          </FormItem>
-          <FormItem label="验证码" required name="verifyCode">
-            <Input v-model:value="form.verifyCode" placeholder="四位验证码">
+            </AInput>
+          </AFormItem>
+          <AFormItem label="验证码" required name="verifyCode">
+            <AInput v-model:value="form.verifyCode" placeholder="四位验证码">
               <template #prefix>
                 <LockOutlined class="icon-prefix" />
               </template>
-            </Input>
-          </FormItem>
-          <FormItem>
-            <Button 
+            </AInput>
+          </AFormItem>
+          <AFormItem>
+            <AButton  
               type="primary" 
               size="large" 
               @click="login"
             >
               登录
-            </Button>
-            <Button 
+            </AButton>
+            <AButton  
               size="large" 
               :style="{ marginLeft: '20px' }" 
               :disabled="codeButtonDisable"
               @click="getCode(form.cellphone)"
             >
               {{ counter === 60 ? '获取验证码' : `${counter}秒后重发` }}
-            </Button>
-          </FormItem>
+            </AButton>
+          </AFormItem>
 
           <!-- 跳转倒计时提示区域 -->
           <div v-if="isRedirecting" class="redirect-countdown">
@@ -181,22 +181,22 @@ async function getCode(cellphone: string) {
                 {{ redirectCountdown }}秒后自动跳转...
               </span>
             </div>
-            <Button 
+            <AButton 
               type="link" 
               size="small" 
               class="skip-button" 
               @click="redirectNow"
             >
               立即跳转
-            </Button>
+            </AButton>
             <!-- 可选：进度条 -->
             <div class="progress-bar">
               <div class="progress" :style="{ width: `${(redirectCountdown / 2) * 100}%` }" />
             </div>
           </div>
-        </Form>
-      </Col>
-    </Row>
+        </AForm>
+      </ACol>
+    </ARow>
   </div>
 </template>
 

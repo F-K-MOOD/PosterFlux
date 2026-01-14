@@ -23,7 +23,7 @@
     <div class="shadow-item">
       <span>阴影模糊:</span>
       <div class="shadow-component">
-        <Slider 
+        <ASlider 
           :value="parseInt(values[2])" 
           :min="0" 
           :max="20" 
@@ -35,7 +35,6 @@
 </template>
 
 <script lang="ts" setup>
-import {Slider} from 'ant-design-vue'
 import { computed } from 'vue'
 
 import ColorPicker from './ColorPicker.vue'
@@ -44,7 +43,6 @@ defineOptions({
   name: 'ShadowPicker',
   components: {
     ColorPicker,
-    Slider,
   },
 })
 // 定义组件props与emits

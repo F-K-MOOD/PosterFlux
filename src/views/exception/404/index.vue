@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { Button } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -24,9 +23,9 @@ function goHome() {
           <img src="@/icons/404.svg" alt="404">
         </div>
       </div>
-      <Button type="primary" @click="goHome">
+      <AButton type="primary" @click="goHome">
         Go to Home
-      </Button>
+      </AButton>
     </div>
   </div>
 </template>

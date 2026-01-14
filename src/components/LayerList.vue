@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { DragOutlined, EyeInvisibleOutlined, EyeOutlined, LockOutlined, UnlockOutlined } from '@ant-design/icons-vue'
-import { Button, Tooltip } from 'ant-design-vue'
 import { arrayMoveImmutable } from 'array-move'
 import { reactive } from 'vue'
 
@@ -84,38 +83,38 @@ function onDrop(e: DragEvent) {
         @dragstart="onDragStart($event, item.id, index)"
         @dragenter="onDragEnter($event, index)"
       >
-        <Tooltip :title="item.isHidden ? '显示' : '隐藏'">
-          <Button shape="circle" @click.stop="handleChange(item.id, 'isHidden', !item.isHidden)">
+        <ATooltip :title="item.isHidden ? '显示' : '隐藏'">
+          <AButton shape="circle" @click.stop="handleChange(item.id, 'isHidden', !item.isHidden)">
             <template v-if="item.isHidden" #icon>
               <EyeOutlined />
             </template>
             <template v-else #icon>
               <EyeInvisibleOutlined />
             </template>
-          </Button>
-        </Tooltip>
-        <Tooltip :title="item.isLocked ? '解锁' : '锁定'">
-          <Button shape="circle" @click.stop="handleChange(item.id, 'isLocked', !item.isLocked)">
+          </AButton>
+        </ATooltip>
+        <ATooltip :title="item.isLocked ? '解锁' : '锁定'">
+          <AButton shape="circle" @click.stop="handleChange(item.id, 'isLocked', !item.isLocked)">
             <template v-if="item.isLocked" #icon>
               <UnlockOutlined />
             </template>
             <template v-else #icon>
               <LockOutlined />
             </template>
-          </Button>
-        </Tooltip>
+          </AButton>
+        </ATooltip>
         <inline-edit 
           class="edit-area" 
           :value="item.layerName"
           @change="(value) => { handleChange(item.id, 'layerName', value) }"
         />
-        <Tooltip title="拖动排序">
-          <Button shape="circle" class="handle">
+        <ATooltip title="拖动排序">
+          <AButton shape="circle" class="handle">
             <template #icon>
               <DragOutlined />
             </template>
-          </Button>
-        </Tooltip>
+          </AButton>
+        </ATooltip>
       </li>
   </ul>
 </template>

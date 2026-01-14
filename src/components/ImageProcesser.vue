@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { DeleteOutlined, ScissorOutlined } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
-import { Button as AButton, Modal } from 'ant-design-vue'
 import Cropper from 'cropperjs'
 import { computed, nextTick, ref, watch } from 'vue'
 
@@ -81,7 +80,7 @@ const handleDelete = () => {
 
 <template>
   <div class="image-processer">
-    <Modal 
+    <AModal 
       v-model:visible="showModal" 
       title="裁剪图片" 
       ok-text="确认" 
@@ -97,7 +96,7 @@ const handleDelete = () => {
           crossOrigin="anonymous"
         >
       </div>
-    </Modal>
+    </AModal>
     <div class="image-preview" :style="{ backgroundImage: backgroundUrl }" :class="{ 'extraHeight': showDelete }" />
     <div class="image-process">
       <styled-uploader @success="handleFileUploaded" />

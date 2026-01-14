@@ -23,6 +23,7 @@ RenderVnode
 resizers
 sider
 STFangsong
+treemap
 unplugin
 uuidv4
 veri

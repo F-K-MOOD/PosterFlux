@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-import { Button, Card, CardMeta, Col, Row, Tag } from 'ant-design-vue';
-
 import type { TemplateProps } from '@/store/modules/templates/helper'
 
 defineOptions({
@@ -15,42 +13,42 @@ const props = defineProps<TemplateListProps>()
 
 <template>
   <div class="template-list-component">
-    <Row :gutter="16">
-      <Col 
+    <ARow :gutter="16">
+      <ACol 
         v-for="item in props.list" 
         :key="item.id" 
         :span="6" 
         class="poster-item"
       >
         <router-link :to="{ name: 'template', params: { id: item.id } }">
-          <Card hoverable>
+          <ACard hoverable>
             <template #cover>
               <img v-if="item.coverImg" :src="item.coverImg">
               <img v-else src="https://pf-server.oss-cn-beijing.aliyuncs.com/userProfile.png">
               <div class="hover-item">
-                <Button size="large" type="primary">使用该模版创建</Button>
+                <AButton size="large" type="primary">使用该模版创建</AButton>
               </div>
             </template>
-            <CardMeta :title="item.title">
+            <ACardMeta :title="item.title">
               <template #description>
                 <div class="description-detail">
                   <span>作者：{{ item.author }}</span>
                   <span class="user-number">{{ item.copiedCount }}</span>
                 </div>
               </template>
-            </CardMeta>
-          </Card>
+            </ACardMeta>
+          </ACard>
           <div class="tag-list">
-            <Tag v-if="item.isHot" color="red">
+            <ATag v-if="item.isHot" color="red">
               HOT
-            </Tag>
-            <Tag v-if="item.isNew" color="green">
+            </ATag>
+            <ATag v-if="item.isNew" color="green">
               NEW
-            </Tag>
+            </ATag>
           </div>
         </router-link>
-      </Col>
-    </Row>
+      </ACol>
+    </ARow>
   </div>
 </template>
 

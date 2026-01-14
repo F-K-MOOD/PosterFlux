@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { Button } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -25,9 +24,9 @@ function goHome() {
           </div>
         </div>
       </header>
-      <Button type="primary" @click="goHome">
+      <AButton type="primary" @click="goHome">
         Go to Home
-      </Button>
+      </AButton>
     </div>
   </div>
 </template>

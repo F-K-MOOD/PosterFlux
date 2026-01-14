@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Button,DropdownButton,Menu,MenuItem,message } from 'ant-design-vue'
+import {message } from 'ant-design-vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 
@@ -49,16 +49,16 @@ const logout = () => {
     </Button>
   </router-link>
   <div v-else>
-    <DropdownButton class="user-profile-component">
+    <ADropdownButton class="user-profile-component">
       <router-link to="/setting">{{ user.data.nickName }}</router-link>
       <template #overlay>
-        <Menu class="user-profile-dropdown">
-          <MenuItem key="0" @click="createDesign">创建作品</MenuItem>
-          <MenuItem key="1"><router-link to="/works">我的作品</router-link></MenuItem>
-          <MenuItem key="2" @click="logout">登出</MenuItem>
-        </Menu>
+        <AMenu class="user-profile-dropdown">
+          <AMenuItem key="0" @click="createDesign">创建作品</AMenuItem>
+          <AMenuItem key="1"><router-link to="/works">我的作品</router-link></AMenuItem>
+          <AMenuItem key="2" @click="logout">登出</AMenuItem>
+        </AMenu>
       </template>
-    </DropdownButton>
+    </ADropdownButton>
   </div>
 </template>
 

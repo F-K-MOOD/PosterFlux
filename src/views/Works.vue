@@ -1,25 +1,25 @@
 <template>
   <div class="mywork-container content-container">
-    <Row 
+    <ARow 
     type="flex" 
     justify="space-between" 
     align="middle"
     class="poster-title" 
   >
       <h2>我的作品和模版</h2>
-    </Row>
-    <Tabs @change="changeCategory">
-      <TabPane key="0" tab="我的作品" />
-      <TabPane key="1" tab="我的模版" />
-    </Tabs>
-    <Empty v-if="works.length === 0 && !isLoading">
+    </ARow>
+    <ATabs @change="changeCategory">
+      <ATabPane key="0" tab="我的作品" />
+      <ATabPane key="1" tab="我的模版" />
+    </ATabs>
+    <AEmpty v-if="works.length === 0 && !isLoading">
       <template #description>
         <span> 还没有任何作品 </span>
       </template>
-      <Button type="primary" size="large">
+      <AButton type="primary" size="large">
         创建你的第一个设计 🎉
-      </Button>
-    </Empty>
+      </AButton>
+    </AEmpty>
 
     <works-list
       :list="works" 
@@ -27,7 +27,7 @@
       @on-delete="onDelete" 
       @on-copy="onCopy"
     />
-    <Row type="flex" justify="space-between" align="middle">
+    <ARow type="flex" justify="space-between" align="middle">
       <ul class="ant-pagination">
         <li class="ant-pagination-prev" :class="{'ant-pagination-disabled': isFirstPage}">
           <a class="ant-pagination-item-link" @click.prevent="loadPrevPage">
@@ -49,7 +49,7 @@
         </li>
       </ul>
       <h2>{{ pageIndex }}</h2>
-      <Button 
+      <AButton 
         v-if="!isFirstPage" 
         type="primary" 
         size="large" 
@@ -57,8 +57,8 @@
         @click="loadPrevPage"
       >
         上一页
-      </Button>
-      <Button 
+      </AButton>
+      <AButton 
         v-if="!isLastPage" 
         type="primary" 
         size="large" 
@@ -66,13 +66,12 @@
         @click="loadMorePage"
       >
         下一页
-      </Button>
-    </Row>
+      </AButton>
+    </ARow>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { Button, Empty ,Row, TabPane,Tabs} from 'ant-design-vue'
 import {  computed, nextTick,onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 

@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { Collapse, CollapsePanel } from 'ant-design-vue'
 import type { AllComponentProps } from 'lego-bricks'
 import { difference } from 'lodash-es'
 import { computed, ref } from 'vue'
