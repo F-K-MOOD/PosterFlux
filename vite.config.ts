@@ -1,6 +1,6 @@
 import vue from '@vitejs/plugin-vue'
-import { defineConfig } from 'vite'
 import { visualizer } from 'rollup-plugin-visualizer'
+import { defineConfig } from 'vite'
 import compressPlugin from 'vite-plugin-compression'
 
 // https://vite.dev/config/
@@ -42,7 +42,7 @@ export default defineConfig({
           'utils': ['axios', 'lodash-es', 'uuid', 'qrcode', 'file-saver', 'array-move', 'hotkeys-js', 'path-to-regexp'],
           // 其他依赖
           'other': ['vuedraggable', 'lego-bricks', 'cropperjs', 'html2canvas']
-        }
+        },
       }
     }
   },
