@@ -41,12 +41,12 @@ const logout = () => {
 
 <template>
   <router-link v-if="!props.user.isLogin" to="/login">
-    <Button 
+    <AButton 
       type="primary"  
       class="user-profile-component"
     >
       登录
-    </Button>
+    </AButton>
   </router-link>
   <div v-else>
     <ADropdownButton class="user-profile-component">

@@ -38,6 +38,7 @@ const pointerOffsetInElement = {
 // 计算鼠标在元素内的偏移量
 function handleDragStart(e: MouseEvent) {
   if (!editWrapperRef.value) return
+  editWrapperRef.value.style.willChange = 'left, top'
   const { top, left } = editWrapperRef.value.getBoundingClientRect()
   // 鼠标在视口中的位置 - 元素在视口中的位置 = 鼠标相对于元素的偏移量
   pointerOffsetInElement.y = e.clientY - top; // (鼠标在元素内部，距顶部px)
@@ -66,8 +67,7 @@ function handleDragStart(e: MouseEvent) {
     animationFrameId = requestAnimationFrame(() => {
       // 这里的代码只在浏览器准备重绘时执行
       const { left, top } = calculateElementPosition(e)
-      editWrapperRef.value!.style.transform = `translate(${left}px, ${top}px)`
-      // 获取元素当前的 transform 值
+      applyStylesChanges(editWrapperRef.value!, { left, top })
     })
   }
   // 处理鼠标移动松开
@@ -77,6 +77,10 @@ function handleDragStart(e: MouseEvent) {
     if (animationFrameId !== null) {
       cancelAnimationFrame(animationFrameId)
       animationFrameId = null
+    }
+    // 移除 will-change
+    if (editWrapperRef.value) {
+      editWrapperRef.value.style.willChange = ''
     }
     if (isDragging) {
       emits('update-position', {
@@ -93,7 +97,6 @@ function handleDragStart(e: MouseEvent) {
     })
   }
   document.addEventListener('mousemove', handleMove)
-  // 鼠标松开时，移除移动事件
   document.addEventListener('mouseup', handleMouseUp)
 }
 
@@ -144,24 +147,41 @@ function calculateSize(direction: ResizeDirection, e: MouseEvent, positions: Ori
       break
   }
 }
+// 批量应用样式变化
+function applyStylesChanges(element: HTMLElement,styles: {width?: number, height?: number, left?: number, top?: number}) {
+  // 使用 CSS 变量或一次性设置多个样式
+  Object.assign(element.style, {
+    width: styles.width !== undefined ? `${styles.width}px` : '',
+    height: styles.height !== undefined ? `${styles.height}px` : '',  
+    left: styles.left !== undefined ? `${styles.left}px` : '',
+    top: styles.top !== undefined ? `${styles.top}px` : '',
+  })
+}
 function startResize(direction: ResizeDirection) {
   const currentElement = editWrapperRef.value as HTMLElement
+  let resizeAnimationId: number | null = null
   const { left, top, right, bottom } = currentElement.getBoundingClientRect()
   function handleMove(e: MouseEvent) {
-    const size = calculateSize(direction, e, { left, right, top, bottom })
-    if(size) {
-      currentElement.style.width = `${size.width}px`
-      currentElement.style.height = `${size.height}px`
-      if(size.left !== undefined) {
-        currentElement.style.left = `${size.left}px`
-      }
-      if(size.top !== undefined) {
-        currentElement.style.top = `${size.top}px`
-      }
+    // 取消之前计划的动画帧
+    if (resizeAnimationId !== null) {
+      cancelAnimationFrame(resizeAnimationId)
     }
+    
+    currentElement.style.willChange = 'width, height, left, top'
+    // 使用 requestAnimationFrame 节流
+    resizeAnimationId = requestAnimationFrame(() => {
+      const styles = calculateSize(direction, e, { left, right, top, bottom })
+      if (styles) {
+        // ⭐ 关键优化：批量更新样式 ⭐
+        applyStylesChanges(currentElement, styles)
+      }
+    })
+    
   }
   function handleMouseUp(e: MouseEvent) {
     document.removeEventListener('mousemove', handleMove)
+    // 移除 will-change
+    currentElement.style.willChange = ''
     const size = calculateSize(direction, e, { left, right, top, bottom })
     emits('update-position', { ...size, id: props.id })
     nextTick(() => {
