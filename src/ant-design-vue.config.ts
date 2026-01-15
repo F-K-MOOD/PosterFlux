@@ -7,6 +7,7 @@ import {
   Collapse,
   CollapsePanel,
   Drawer,
+  DropdownButton,
   Empty,
   Form,
   FormItem,
@@ -29,8 +30,9 @@ import {
   Spin,
   TabPane,
   Tabs,
+  Tag,
   Textarea,
-  Tooltip
+  Tooltip,
 } from 'ant-design-vue'
 import type { App } from 'vue'
 
@@ -43,6 +45,7 @@ const components = [
   Collapse,
   CollapsePanel,
   Drawer,
+  DropdownButton, 
   Empty,
   Form,
   FormItem,
@@ -65,8 +68,10 @@ const components = [
   Spin,
   TabPane,
   Tabs,
+  Tag,
   Textarea,
-  Tooltip
+  Tooltip,
+
 ]
 
 export default {
@@ -74,6 +79,7 @@ export default {
     components.forEach((component) => {
       // 只注册组件的原始名称（带A前缀）
       app.component(component.name, component)
+      console.log('注册组件', component.name)
     })
   },
 }

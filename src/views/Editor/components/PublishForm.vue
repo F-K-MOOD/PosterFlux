@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { type FormInstance, message } from 'ant-design-vue'
-import { Button, Col, Form, FormItem, Input, Row, TabPane, Tabs } from 'ant-design-vue'
 import type { Rule } from 'ant-design-vue/es/form'
 import ClipboardJS from 'clipboard'
 import { last } from 'lodash-es'
@@ -94,71 +93,71 @@ watch(channels, async (newChannels, oldChannels) => {
 
 <template>
   <div class="publish-channel-container">
-    <Row :style="{ marginBottom: '20px' }">
-      <Col :span="8" class="left-col">
+    <ARow :style="{ marginBottom: '20px' }">
+      <ACol :span="8" class="left-col">
         封面图
         <img :src="page.coverImg" :alt="page.title">
-      </Col>
-      <Col :span="16" class="right-col">
-        <Row type="flex" align="middle">
-          <Col :span="6">
+      </ACol>
+      <ACol :span="16" class="right-col">
+        <ARow type="flex" align="middle">
+          <ACol :span="6">
             <img src="http://vue-maker.oss-cn-hangzhou.aliyuncs.com/vue-marker/5f79389d4737571e2e1dc7cb.png"
               :alt="page.title">
-          </Col>
-          <Col :span="18" class="left-gap">
+          </ACol>
+          <ACol :span="18" class="left-gap">
             <h4>{{ page.title }}</h4>
             <p>{{ page.desc }}</p>
-          </Col>
-        </Row>
-        <Tabs type="card" :style="{ marginTop: '20px' }">
-          <TabPane key="channels" tab="发布为作品">
-            <Row v-for="channel in channels" :key="channel.id" class="channel-item">
-              <Col :span="6">
+          </ACol>
+        </ARow>
+        <ATabs type="card" :style="{ marginTop: '20px' }">
+          <ATabPane key="channels" tab="发布为作品">
+            <ARow v-for="channel in channels" :key="channel.id" class="channel-item">
+              <ACol :span="6">
                 <canvas :id="`channel-barcode-${channel.id}`" class="barcode-container" />
-              </Col>
-              <Col :span="18" class="left-gap">
+              </ACol>
+              <ACol :span="18" class="left-gap">
                 <h4>{{ channel.name }}</h4>
-                <Row>
-                  <Col :span="18">
+                <ARow>
+                  <ACol :span="18">
                     <Input :id="`channel-url-${channel.id}`" :value="generateChannelURL(channel.id)" :readonly="true" />
-                  </Col>
-                  <Col :span="6">
-                    <Button class="copy-button" :data-clipboard-target="`#channel-url-${channel.id}`">复制</Button>
-                  </Col>
-                </Row>
-              </Col>
+                  </ACol>
+                  <ACol :span="6">
+                    <AButton class="copy-button" :data-clipboard-target="`#channel-url-${channel.id}`">复制</AButton>
+                  </ACol>
+                </ARow>
+              </ACol>
               <div class="delete-area">
-                <Button 
+                <AButton 
                   danger 
                   size="small" 
                   :disabled="deleteDisabled" 
                   @click="deleteChannel(channel.id)"
                 >
                   删除渠道
-                </Button>
+                </AButton>
               </div>
-            </Row>
-            <Form 
+            </ARow>
+            <AForm 
               ref="channelForm" 
               layout="inline" 
               :style="{ marginTop: '20px' }" 
               :model="form" 
               :rules="rules"
             >
-              <FormItem name="channelName">
+              <AFormItem name="channelName">
                 <Input v-model:value="form.channelName" placeholder="渠道名称" />
-              </FormItem>
-              <FormItem>
-                <Button type="primary" @click="createChannel">
+              </AFormItem>
+              <AFormItem>
+                <AButton type="primary" @click="createChannel">
                   创建新渠道
-                </Button>
-              </FormItem>
-            </Form>
-          </TabPane>
-          <TabPane key="template" tab="发布为模版" />
-        </Tabs>
-      </Col>
-    </Row>
+                </AButton>
+              </AFormItem>
+            </AForm>
+          </ATabPane>
+          <ATabPane key="template" tab="发布为模版" />
+        </ATabs>
+      </ACol>
+    </ARow>
   </div>
 </template>
 
