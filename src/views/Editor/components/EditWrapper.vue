@@ -25,6 +25,8 @@ function onItemClick(id: string) {
 }
 
 // !鼠标拖动元素移动实现
+// 添加动画帧ID存储
+let animationFrameId: number | null = null
 const editWrapperRef = ref<HTMLDivElement | null>(null)
 // 记录是否正在拖动元素
 let isDragging = false
@@ -54,28 +56,41 @@ function handleDragStart(e: MouseEvent) {
   }
   // 处理移动
   function handleMove(e: MouseEvent) {
-    if (!editWrapperRef.value) return
+    if (!editWrapperRef.value ) return
     isDragging = true
-    const { left, top } = calculateElementPosition(e)
-    editWrapperRef.value.style.left = `${left}px`
-    editWrapperRef.value.style.top = `${top}px`
+    // 取消之前计划的动画帧
+    if (animationFrameId !== null) {
+      cancelAnimationFrame(animationFrameId)
+    }
+    // 使用 requestAnimationFrame 安排下一次更新
+    animationFrameId = requestAnimationFrame(() => {
+      // 这里的代码只在浏览器准备重绘时执行
+      const { left, top } = calculateElementPosition(e)
+      editWrapperRef.value!.style.transform = `translate(${left}px, ${top}px)`
+      // 获取元素当前的 transform 值
+    })
   }
   // 处理鼠标移动松开
   function handleMouseUp() {
-      document.removeEventListener('mousemove', handleMove)
-      if (isDragging) {
-        emits('update-position', {
-          id: props.id,
-          left: editWrapperRef.value?.style.left,  //这里是带px单位的字符串
-          top: editWrapperRef.value?.style.top,  //这里是带px单位的字符串
-        })
-        // console.log('width', editWrapperRef.value?.style.width);  这里也是带px单位的
-        // console.log('height', editWrapperRef.value?.style.height); 这里也是带px单位的
-        isDragging = false
-      }
-      nextTick(() => {
-        document.removeEventListener('mouseup', handleMouseUp)
+    document.removeEventListener('mousemove', handleMove)
+      // 清理动画帧
+    if (animationFrameId !== null) {
+      cancelAnimationFrame(animationFrameId)
+      animationFrameId = null
+    }
+    if (isDragging) {
+      emits('update-position', {
+        id: props.id,
+        left: editWrapperRef.value?.style.left,  //这里是带px单位的字符串
+        top: editWrapperRef.value?.style.top,  //这里是带px单位的字符串
       })
+      // console.log('width', editWrapperRef.value?.style.width);  这里也是带px单位的
+      // console.log('height', editWrapperRef.value?.style.height); 这里也是带px单位的
+      isDragging = false
+    }
+    nextTick(() => {
+      document.removeEventListener('mouseup', handleMouseUp)
+    })
   }
   document.addEventListener('mousemove', handleMove)
   // 鼠标松开时，移除移动事件
