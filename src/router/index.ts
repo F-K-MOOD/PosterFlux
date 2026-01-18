@@ -37,11 +37,16 @@ const router = createRouter({
       name: '404',
       component: () => import('@/views/exception/404/index.vue'),
     },
-
     {
       path: '/500',
       name: '500',
       component: () => import('@/views/exception/500/index.vue'),
+    },
+    {
+      path: '/chat',
+      name: 'chat',
+      component: () => import('../views/Chat/index.vue'),
+      meta: { requiredLogin: true, title: '智能助手' }
     },
   ]
 })

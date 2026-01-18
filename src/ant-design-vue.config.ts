@@ -71,7 +71,6 @@ const components = [
   Tag,
   Textarea,
   Tooltip,
-
 ]
 
 export default {
@@ -79,7 +78,6 @@ export default {
     components.forEach((component) => {
       // 只注册组件的原始名称（带A前缀）
       app.component(component.name, component)
-      console.log('注册组件', component.name)
     })
   },
 }

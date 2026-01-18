@@ -11,6 +11,27 @@ import useUserStore from '@/store/modules/user'
 const userStore = useUserStore()
 const router = useRouter()
 
+// 视频播放状态控制
+const showVideo = ref(true)
+const showLogin = ref(false)
+const isVideoEnded = ref(false)
+
+// 视频播放结束后切换到登录页
+function handleVideoEnd() {
+  isVideoEnded.value = true
+  setTimeout(() => {
+    showVideo.value = false
+    showLogin.value = true
+  }, 500) // 视频结束后延迟显示登录页
+}
+
+// 跳过视频，直接显示登录页
+function skipVideo() {
+  showVideo.value = false
+  showLogin.value = true
+  isVideoEnded.value = true
+}
+
 // 获取验证码倒计时
 let verifyCodeTimer = 0
 const counter = ref(60)
@@ -119,88 +140,232 @@ async function getCode(cellphone: string) {
   console.log('验证码:', response.data.data.verifyCode)
   startCounter()
 }
+
+// 组件挂载时检查是否已登录，如果已登录则直接跳转
+// onMounted(() => {
+//   if (userStore.token) {
+//     router.push('/')
+//   }
+// })
 </script>
 
 <template>
-  <div class="login-page">
-    <ARow>
-      <ACol :span="12" class="aside">
-        <div class="aside-inner">
-          <router-link to="/">
-            <img alt="FK-PosterFlux" src="../assets/login.png" class="pf-img">
-          </router-link>
-          <h2>欢迎使用PosterFlux</h2>
-        </div>
-      </ACol>
-      <ACol :span="12" class="login-area">
-        <AForm 
-          ref="loginForm" 
-          layout="vertical" 
-          :model="form" 
-          :rules="rules"
+  <div class="login-container">
+    <!-- 视频播放层 -->
+    <div v-if="showVideo" class="video-overlay">
+      <div class="video-wrapper">
+        <video 
+          ref="videoPlayer" 
+          class="intro-video" 
+          autoplay 
+          muted 
+          playsinline 
+          @ended="handleVideoEnd"
         >
-          <h2>欢迎回来</h2>
-          <p class="subTitle">使用手机号码和验证码登录</p>
-          <AFormItem label="手机号码" required name="cellphone">
-            <AInput v-model:value="form.cellphone" placeholder="手机号码">
-              <template #prefix>
-                <UserOutlined class="icon-prefix" />
-              </template>
-            </AInput>
-          </AFormItem>
-          <AFormItem label="验证码" required name="verifyCode">
-            <AInput v-model:value="form.verifyCode" placeholder="四位验证码">
-              <template #prefix>
-                <LockOutlined class="icon-prefix" />
-              </template>
-            </AInput>
-          </AFormItem>
-          <AFormItem>
-            <AButton  
-              type="primary" 
-              size="large" 
-              @click="login"
-            >
-              登录
-            </AButton>
-            <AButton  
-              size="large" 
-              :style="{ marginLeft: '20px' }" 
-              :disabled="codeButtonDisable"
-              @click="getCode(form.cellphone)"
-            >
-              {{ counter === 60 ? '获取验证码' : `${counter}秒后重发` }}
-            </AButton>
-          </AFormItem>
+          <source src="@/assets/intro-video.mp4" type="video/mp4">
+          您的浏览器不支持视频播放。
+        </video>
 
-          <!-- 跳转倒计时提示区域 -->
-          <div v-if="isRedirecting" class="redirect-countdown">
-            <div class="countdown-info">
-              <ASpin />
-              <span class="countdown-text">
-                {{ redirectCountdown }}秒后自动跳转...
-              </span>
-            </div>
-            <AButton 
-              type="link" 
-              size="small" 
-              class="skip-button" 
-              @click="redirectNow"
-            >
-              立即跳转
-            </AButton>
-            <!-- 可选：进度条 -->
-            <div class="progress-bar">
-              <div class="progress" :style="{ width: `${(redirectCountdown / 2) * 100}%` }" />
-            </div>
+        <!-- 跳过按钮 -->
+        <button class="skip-btn" @click="skipVideo">
+          {{ isVideoEnded ? '进入' : '跳过' }}
+        </button>
+
+        <!-- 进度提示 -->
+        <div v-if="!isVideoEnded" class="video-tip">
+          正在为您展示平台特色...
+        </div>
+      </div>
+    </div>
+
+    <!-- 登录页面（原有内容） -->
+    <div v-show="showLogin" :class="['login-page', { 'fade-in': showLogin }]">
+      <ARow>
+        <ACol :span="12" class="aside">
+          <div class="aside-inner">
+            <router-link to="/">
+              <img alt="FK-PosterFlux" src="../assets/login.png" class="pf-img">
+            </router-link>
+            <h2>欢迎使用PosterFlux</h2>
           </div>
-        </AForm>
-      </ACol>
-    </ARow>
+        </ACol>
+        <ACol :span="12" class="login-area">
+          <AForm 
+            ref="loginForm" 
+            layout="vertical" 
+            :model="form" 
+            :rules="rules"
+          >
+            <h2>欢迎回来</h2>
+            <p class="subTitle">使用手机号码和验证码登录</p>
+            <AFormItem label="手机号码" required name="cellphone">
+              <AInput v-model:value="form.cellphone" placeholder="手机号码">
+                <template #prefix>
+                  <UserOutlined class="icon-prefix" />
+                </template>
+              </AInput>
+            </AFormItem>
+            <AFormItem label="验证码" required name="verifyCode">
+              <AInput v-model:value="form.verifyCode" placeholder="四位验证码">
+                <template #prefix>
+                  <LockOutlined class="icon-prefix" />
+                </template>
+              </AInput>
+            </AFormItem>
+            <AFormItem>
+              <AButton type="primary" size="large" @click="login">
+                登录
+              </AButton>
+              <AButton 
+                size="large" 
+                :style="{ marginLeft: '20px' }" 
+                :disabled="codeButtonDisable"
+                @click="getCode(form.cellphone)"
+              >
+                {{ counter === 60 ? '获取验证码' : `${counter}秒后重发` }}
+              </AButton>
+            </AFormItem>
+
+            <!-- 跳转倒计时提示区域 -->
+            <div v-if="isRedirecting" class="redirect-countdown">
+              <div class="countdown-info">
+                <ASpin />
+                <span class="countdown-text">
+                  {{ redirectCountdown }}秒后自动跳转...
+                </span>
+              </div>
+              <AButton 
+                type="link" 
+                size="small" 
+                class="skip-button" 
+                @click="redirectNow"
+              >
+                立即跳转
+              </AButton>
+              <!-- 可选：进度条 -->
+              <div class="progress-bar">
+                <div class="progress" :style="{ width: `${(redirectCountdown / 2) * 100}%` }" />
+              </div>
+            </div>
+          </AForm>
+        </ACol>
+      </ARow>
+    </div>
   </div>
 </template>
 
 <style scoped>
+/* 视频播放相关样式 */
+.login-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.video-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.video-wrapper {
+  position: relative;
+  max-width: 1200px;
+  width: 90%;
+  max-height: 80vh;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.intro-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+.skip-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 1001;
+}
+
+.skip-btn:hover {
+  background: rgba(0, 0, 0, 0.8);
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: translateY(-2px);
+}
+
+.video-tip {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  animation: pulse 2s infinite;
+  z-index: 1001;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+/* 登录页动画 */
+.login-page {
+  width: 100%;
+  height: 100vh;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.login-page.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 原有的登录页样式 */
 .login-page {
   height: 100vh;
   background-color: #f5f5f5;
@@ -426,6 +591,25 @@ async function getCode(cellphone: string) {
 
   .countdown-text {
     font-size: 14px;
+  }
+
+  /* 移动端视频播放优化 */
+  .video-wrapper {
+    width: 95%;
+    max-height: 85vh;
+  }
+
+  .skip-btn {
+    top: 15px;
+    right: 15px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .video-tip {
+    font-size: 12px;
+    padding: 6px 12px;
+    bottom: 20px;
   }
 }
 </style>
