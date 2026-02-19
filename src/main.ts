@@ -11,6 +11,9 @@ import pinia from './store/index'
 
 const app = createApp(App)
 
+import lazyImg from './directives/lazyImg'
+app.directive('lazy', lazyImg)
+
 
 app.use(Antd).use(pinia).use(router)
 

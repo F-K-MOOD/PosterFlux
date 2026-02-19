@@ -8,15 +8,15 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"npm run dev:client\" \"cd server && npm run dev\"",
+    "dev:client": "vite",
     "build": "vite build",
     "prepare": "husky",
     "lint:es": "eslint src/**/*.{ts,vue}",
     "lint:style": "stylelint src/**/*.vue",
     "spellcheck": "cspell lint --dot --cache --color --show-suggestions --gitignore \"src/**/*.@(html|js|cjs|mjs|ts|tsx|css|scss|md|vue)\"",
     "commit": "git-cz",
-    "preview": "vite preview",
-    "dev:all": "concurrently \"npm run dev\" \"cd server && npm run dev\""
+    "preview": "vite preview"
   },
   "config": {
     "commitizen": {
@@ -27,6 +27,7 @@
     "@ant-design-vue/use": "0.0.1-alpha.10",
     "@ant-design/icons-vue": "^7.0.1",
     "@types/lodash-es": "^4.17.12",
+    "@vueuse/core": "^14.2.1",
     "ant-design-vue": "^4.2.6",
     "array-move": "^4.0.0",
     "axios": "^1.13.2",

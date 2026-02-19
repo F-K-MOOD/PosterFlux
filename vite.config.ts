@@ -47,11 +47,11 @@ export default defineConfig({
     }
   },
   server: {
+    port: 5173,
     proxy: {
       '/api': {
         target: 'http://localhost:7001',
         changeOrigin: true,
-        // 保留/api前缀，与后端路由保持一致
       },
     },
   },

@@ -4,6 +4,7 @@ aliyuncs
 autod
 axios
 cellnumber
+chatglm
 commitlint
 cropperjs
 DASHSCOPE
@@ -17,6 +18,7 @@ Kaiti
 Klick
 mywork
 Persistedstate
+pexels
 processer
 qrcode
 RenderVnode
@@ -29,3 +31,4 @@ uuidv4
 veri
 VITE
 vuedraggable
+vueuse

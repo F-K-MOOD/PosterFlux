@@ -3,7 +3,7 @@ import { Controller } from 'egg'
 import * as sendToWormhole from 'stream-wormhole'
 import * as Busboy from 'busboy'
 import { nanoid } from 'nanoid'
-import { createWriteStream } from 'fs'
+import { createWriteStream, readFileSync } from 'fs'
 import { parse, join, extname } from 'path'
 import { pipeline } from 'stream/promises'
 import { createSSRApp } from 'vue'
@@ -196,4 +196,54 @@ export default class UtilsController extends Controller {
   //   }
   //   ctx.helper.success({ ctx, res: { url: this.pathToURL(savedFilePath), thumbnailUrl: this.pathToURL(savedThumbnailPath) } })
   // }
+
+  async getPexelsList() {
+    const { ctx, app } = this
+    try {
+      const { page = 1, per_page = 10 } = ctx.query
+      const pageNum = parseInt(page as string)
+      const perPage = parseInt(per_page as string)
+
+      const csvFilePath = join(app.config.baseDir, 'export_urls.csv')
+      const csvContent = readFileSync(csvFilePath, 'utf-8')
+      const lines = csvContent.split('\n').filter(line => line.trim())
+
+      const data: Array<{ id: number, name: string, url: string, description: string }> = []
+
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',')
+        if (values.length >= 4) {
+          data.push({
+            id: parseInt(values[0]),
+            name: values[1],
+            url: values[2],
+            description: values[3]
+          })
+        }
+      }
+
+      const total = data.length
+      const startIndex = (pageNum - 1) * perPage
+      const endIndex = startIndex + perPage
+      const paginatedData = data.slice(startIndex, endIndex)
+
+      ctx.helper.success({
+        ctx,
+        res: {
+          data: paginatedData,
+          total,
+          page: pageNum,
+          per_page: perPage,
+          total_pages: Math.ceil(total / perPage)
+        }
+      })
+    } catch (e) {
+      app.logger.error('Error reading CSV file:', e)
+      ctx.helper.error({
+        ctx,
+        errorType: 'imageUploadFail',
+        error: `Failed to read CSV file: ${e instanceof Error ? e.message : 'Unknown error'}`
+      })
+    }
+  }
 }

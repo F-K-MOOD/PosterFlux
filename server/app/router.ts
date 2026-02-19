@@ -32,6 +32,7 @@ export default (app: Application) => {
 
   router.post('/utils/upload-img', controller.utils.uploadMutipleFiles)
   router.get('/pages/:idAndUuid', controller.utils.renderH5Page)
+  router.get('/pexels/list', controller.utils.getPexelsList)
   router.post('/channel', controller.work.createChannel)
   router.get('/channel/getWorkChannels/:id', controller.work.getWorkChannel)
   router.patch('/channel/updateName/:id', controller.work.updateChannelName)

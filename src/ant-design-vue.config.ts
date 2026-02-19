@@ -7,6 +7,7 @@ import {
   Collapse,
   CollapsePanel,
   Drawer,
+  DropdownButton,
   Empty,
   Form,
   FormItem,
@@ -29,6 +30,7 @@ import {
   Spin,
   TabPane,
   Tabs,
+  Tag,
   Textarea,
   Tooltip
 } from 'ant-design-vue'
@@ -43,6 +45,7 @@ const components = [
   Collapse,
   CollapsePanel,
   Drawer,
+  DropdownButton,
   Empty,
   Form,
   FormItem,
@@ -65,6 +68,7 @@ const components = [
   Spin,
   TabPane,
   Tabs,
+  Tag,
   Textarea,
   Tooltip
 ]

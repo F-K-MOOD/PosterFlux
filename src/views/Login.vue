@@ -176,7 +176,7 @@ async function getCode(cellphone: string) {
           <!-- 跳转倒计时提示区域 -->
           <div v-if="isRedirecting" class="redirect-countdown">
             <div class="countdown-info">
-              <Spin />
+              <ASpin />
               <span class="countdown-text">
                 {{ redirectCountdown }}秒后自动跳转...
               </span>
