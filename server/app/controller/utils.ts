@@ -1,14 +1,14 @@
 import { Controller } from "egg";
 // import * as sharp from 'sharp'
-import * as sendToWormhole from "stream-wormhole";
-import * as Busboy from "busboy";
-import { nanoid } from "nanoid";
-import { createWriteStream } from "fs";
-import { parse, join, extname } from "path";
-import { pipeline } from "stream/promises";
-import { createSSRApp } from "vue";
-import { renderToString, renderToNodeStream } from "@vue/server-renderer";
-import { FileStream } from "../../typings/app";
+import * as sendToWormhole from 'stream-wormhole'
+import * as Busboy from 'busboy'
+import { nanoid } from 'nanoid'
+import { createWriteStream, readFileSync } from 'fs'
+import { parse, join, extname } from 'path'
+import { pipeline } from 'stream/promises'
+import { createSSRApp } from 'vue'
+import { renderToString, renderToNodeStream } from '@vue/server-renderer'
+import { FileStream } from '../../typings/app'
 export default class UtilsController extends Controller {
   splitIdAndUuid(str = "") {
     const result = { id: "", uuid: "" };
@@ -234,221 +234,53 @@ export default class UtilsController extends Controller {
   //   ctx.helper.success({ ctx, res: { url: this.pathToURL(savedFilePath), thumbnailUrl: this.pathToURL(savedThumbnailPath) } })
   // }
 
-  // 创建异步图像生成任务
-  async createImageTask() {
-    const { ctx, app } = this;
+  async getPexelsList() {
+    const { ctx, app } = this
     try {
-      const { prompt } = ctx.request.body;
-      if (!prompt) {
-        return ctx.helper.error({
-          ctx,
-          errorType: "paramError",
-          error: "Prompt is required",
-        });
+      const { page = 1, per_page = 10 } = ctx.query
+      const pageNum = parseInt(page as string)
+      const perPage = parseInt(per_page as string)
+
+      const csvFilePath = join(app.config.baseDir, 'export_urls.csv')
+      const csvContent = readFileSync(csvFilePath, 'utf-8')
+      const lines = csvContent.split('\n').filter(line => line.trim())
+
+      const data: Array<{ id: number, name: string, url: string, description: string }> = []
+
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',')
+        if (values.length >= 4) {
+          data.push({
+            id: parseInt(values[0]),
+            name: values[1],
+            url: values[2],
+            description: values[3]
+          })
+        }
       }
 
-      // 直接使用dashscope API密钥
-      const apiKey =
-        app.config.dashscope?.apiKey || process.env.DASHSCOPE_API_KEY;
-      if (!apiKey) {
-        app.logger.error("DashScope API key not found");
-        return ctx.helper.error({
-          ctx,
-          errorType: "serverError",
-          error: "DashScope API key not found",
-        });
-      }
+      const total = data.length
+      const startIndex = (pageNum - 1) * perPage
+      const endIndex = startIndex + perPage
+      const paginatedData = data.slice(startIndex, endIndex)
 
-      // 调用阿里云通义千问图像生成API（异步）
-      const response = await ctx.curl(
-        "https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis",
-        {
-          method: "POST",
-          headers: {
-            "X-DashScope-Async": "enable",
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-          data: {
-            model: "wanx-poster-generation-v1",
-            input: {
-              title: "春节快乐",
-              sub_title: "家庭团聚，共享天伦之乐",
-              body_text: "春节是中国最重要的传统节日之一，它象征着新的开始和希望",
-              prompt_text_zh: "灯笼，小猫，梅花",
-              wh_ratios: "竖版",
-              lora_name: "童话油画",
-              lora_weight: 0.8,
-              ctrl_ratio: 0.7,
-              ctrl_step: 0.7,
-              generate_mode: "generate",
-              generate_num: 1
-            },
-            parameters: {},
-          },
-          dataType: "json",
-        },
-      );
-
-      if (response.status !== 200) {
-        app.logger.error("DashScope API error:", response.data);
-        return ctx.helper.error({
-          ctx,
-          errorType: "serverError",
-          error: response.data.message || "Image generation failed",
-        });
-      }
-
-      ctx.helper.success({ ctx, res: response.data });
+      ctx.helper.success({
+        ctx,
+        res: {
+          data: paginatedData,
+          total,
+          page: pageNum,
+          per_page: perPage,
+          total_pages: Math.ceil(total / perPage)
+        }
+      })
     } catch (e) {
-      app.logger.error("Create image task error:", e);
-      ctx.helper.error({ ctx, errorType: "serverError", error: e.message });
-    }
-  }
-
-  // 获取图像生成任务结果
-  async getImageTaskResult() {
-    const { ctx, app } = this;
-    try {
-      const { taskId } = ctx.params;
-      if (!taskId) {
-        return ctx.helper.error({
-          ctx,
-          errorType: "paramError",
-          error: "Task ID is required",
-        });
-      }
-
-      // 直接使用dashscope API密钥
-      const apiKey =
-        app.config.dashscope?.apiKey || process.env.DASHSCOPE_API_KEY;
-      if (!apiKey) {
-        app.logger.error("DashScope API key not found");
-        return ctx.helper.error({
-          ctx,
-          errorType: "serverError",
-          error: "DashScope API key not found",
-        });
-      }
-
-      // 调用阿里云通义千问任务查询API
-      const response = await ctx.curl(
-        `https://dashscope.aliyuncs.com/api/v1/tasks/${taskId}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-          },
-          dataType: "json",
-        },
-      );
-
-      if (response.status !== 200) {
-        app.logger.error("DashScope API error:", response.data);
-        return ctx.helper.error({
-          ctx,
-          errorType: "serverError",
-          error: response.data.message || "Failed to get task result",
-        });
-      }
-
-      ctx.helper.success({ ctx, res: response.data });
-    } catch (e) {
-      app.logger.error("Get image task result error:", e);
-      ctx.helper.error({ ctx, errorType: "serverError", error: e.message });
-    }
-  }
-
-  // 语音合成API - 代理到字节跳动TTS服务
-  async tts() {
-    const { ctx, app } = this;
-    try {
-      const { text, voice, language_type } = ctx.request.body;
-      if (!text) {
-        return ctx.helper.error({
-          ctx,
-          errorType: "paramError",
-          error: "Text is required",
-        });
-      }
-
-      // 调用字节跳动TTS API
-      const response = await ctx.curl(
-        "https://openspeech.bytedance.com/api/v1/tts",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            // 如果需要API密钥，在这里添加
-            // "Authorization": `Bearer ${apiKey}`
-          },
-          data: {
-            text: text,
-            voice: voice || "zh-CN-YunxiNeural", // 字节跳动默认语音
-            format: "mp3",
-            sample_rate: 44100,
-          },
-          dataType: "json",
-          timeout: 30000,
-        },
-      );
-
-      if (response.status !== 200) {
-        app.logger.error("ByteDance TTS API error:", response.data);
-        return ctx.helper.error({
-          ctx,
-          errorType: "serverError",
-          error: response.data.message || "Text to speech conversion failed",
-        });
-      }
-
-      // 将字节跳动API响应转换为前端期望的格式
-      const result = {
-        // 根据字节跳动API实际响应结构调整
-        audio_url: response.data.audio_url || null,
-        audio: response.data.audio || null,
-        output: response.data.output || null,
-      };
-
-      ctx.helper.success({ ctx, res: result });
-    } catch (e) {
-      app.logger.error("TTS proxy error:", e);
-      ctx.helper.error({ ctx, errorType: "serverError", error: e.message });
-    }
-  }
-
-  // 字节跳动TTS API完整代理
-  async ttsProxy() {
-    const { ctx, app } = this;
-    try {
-      // 获取前端发送的原始请求数据
-      const payload = ctx.request.body;
-
-      // 调用字节跳动TTS API
-      const response = await ctx.curl(
-        "https://openspeech.bytedance.com/tts/api/v1/tts",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            // 保留前端发送的Authorization头
-            ...(ctx.header.authorization
-              ? { Authorization: ctx.header.authorization }
-              : {}),
-          },
-          data: payload,
-          dataType: "json",
-          timeout: 30000,
-        },
-      );
-
-      // 直接将字节跳动API响应转发给前端
-      ctx.status = response.status;
-      ctx.body = response.data;
-    } catch (e) {
-      app.logger.error("TTS full proxy error:", e);
-      ctx.status = 500;
-      ctx.body = { error: "TTS proxy failed", message: e.message };
+      app.logger.error('Error reading CSV file:', e)
+      ctx.helper.error({
+        ctx,
+        errorType: 'imageUploadFail',
+        error: `Failed to read CSV file: ${e instanceof Error ? e.message : 'Unknown error'}`
+      })
     }
   }
 }

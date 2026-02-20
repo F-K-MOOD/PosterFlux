@@ -25,9 +25,6 @@ const user = computed(() => useUserStore().state)
         <router-view />
       </ALayoutContent>
     </ALayout>
-    <ALayoutFooter>
-      2026 PosterFlux 海报可视化低代码平台 版权所有
-    </ALayoutFooter>  
   </div>
 </template>
 

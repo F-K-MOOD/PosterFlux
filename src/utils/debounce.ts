@@ -1,13 +1,3 @@
-function debounce(fn: (...args:any[]) => void, delay: number) {
-  let timer: number
-  return function(...args: any[]) {
-    if(timer) {
-      clearTimeout(timer)
-    }
-    timer = setTimeout(() => {
-      fn(...args)
-    }, delay)
-  }
-}
+import { debounce as lodashDebounce } from 'lodash-es'
 
-export default debounce
+export default lodashDebounce

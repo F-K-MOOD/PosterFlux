@@ -60,11 +60,11 @@ export default defineConfig({
     },
   },
   server: {
+    port: 5173,
     proxy: {
       "/api": {
         target: "http://localhost:7001", // 更新为当前后端端口
         changeOrigin: true,
-        // 保留/api前缀，与后端路由保持一致
       },
       "/tts": {
         target: "https://openspeech.bytedance.com",

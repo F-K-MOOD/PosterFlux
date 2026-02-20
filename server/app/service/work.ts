@@ -40,6 +40,7 @@ export default class WorkService extends Service {
     const { content, title, desc, coverImg, id, copiedCount } = copiedWork
     const { _id, username } = ctx.state.user
     const newWork: WorkProps = {
+      id: '',
       user: _id,
       author: username,
       uuid,

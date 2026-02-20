@@ -162,31 +162,60 @@ async function getCode(cellphone: string) {
           playsinline 
           @ended="handleVideoEnd"
         >
-          <source src="@/assets/intro-video.mp4" type="video/mp4">
-          您的浏览器不支持视频播放。
-        </video>
+          <h2>欢迎回来</h2>
+          <p class="subTitle">使用手机号码和验证码登录</p>
+          <AFormItem label="手机号码" required name="cellphone">
+            <AInput v-model:value="form.cellphone" placeholder="手机号码">
+              <template #prefix>
+                <UserOutlined class="icon-prefix" />
+              </template>
+            </AInput>
+          </AFormItem>
+          <AFormItem label="验证码" required name="verifyCode">
+            <AInput v-model:value="form.verifyCode" placeholder="四位验证码">
+              <template #prefix>
+                <LockOutlined class="icon-prefix" />
+              </template>
+            </AInput>
+          </AFormItem>
+          <AFormItem>
+            <AButton  
+              type="primary" 
+              size="large" 
+              @click="login"
+            >
+              登录
+            </AButton>
+            <AButton  
+              size="large" 
+              :style="{ marginLeft: '20px' }" 
+              :disabled="codeButtonDisable"
+              @click="getCode(form.cellphone)"
+            >
+              {{ counter === 60 ? '获取验证码' : `${counter}秒后重发` }}
+            </AButton>
+          </AFormItem>
 
-        <!-- 跳过按钮 -->
-        <button class="skip-btn" @click="skipVideo">
-          {{ isVideoEnded ? '进入' : '跳过' }}
-        </button>
-
-        <!-- 进度提示 -->
-        <div v-if="!isVideoEnded" class="video-tip">
-          正在为您展示平台特色...
-        </div>
-      </div>
-    </div>
-
-    <!-- 登录页面（原有内容） -->
-    <div v-show="showLogin" :class="['login-page', { 'fade-in': showLogin }]">
-      <ARow>
-        <ACol :span="12" class="aside">
-          <div class="aside-inner">
-            <router-link to="/">
-              <img alt="FK-PosterFlux" src="../assets/login.png" class="pf-img">
-            </router-link>
-            <h2>欢迎使用PosterFlux</h2>
+          <!-- 跳转倒计时提示区域 -->
+          <div v-if="isRedirecting" class="redirect-countdown">
+            <div class="countdown-info">
+              <ASpin />
+              <span class="countdown-text">
+                {{ redirectCountdown }}秒后自动跳转...
+              </span>
+            </div>
+            <AButton 
+              type="link" 
+              size="small" 
+              class="skip-button" 
+              @click="redirectNow"
+            >
+              立即跳转
+            </AButton>
+            <!-- 可选：进度条 -->
+            <div class="progress-bar">
+              <div class="progress" :style="{ width: `${(redirectCountdown / 2) * 100}%` }" />
+            </div>
           </div>
         </ACol>
         <ACol :span="12" class="login-area">

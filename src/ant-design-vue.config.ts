@@ -45,7 +45,7 @@ const components = [
   Collapse,
   CollapsePanel,
   Drawer,
-  DropdownButton, 
+  DropdownButton,
   Empty,
   Form,
   FormItem,

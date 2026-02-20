@@ -6,6 +6,7 @@ axios
 bearbobo
 bigtts
 cellnumber
+chatglm
 commitlint
 cropperjs
 DASHSCOPE
@@ -21,6 +22,7 @@ Klick
 logprobs
 mywork
 Persistedstate
+pexels
 processer
 qrcode
 qwen
@@ -38,4 +40,5 @@ uuidv4
 veri
 VITE
 vuedraggable
+vueuse
 wanx
