@@ -31,8 +31,13 @@ export default (app: Application) => {
   router.post('/works/publish-template/:id', controller.work.publishTemplate)
 
   router.post('/utils/upload-img', controller.utils.uploadMutipleFiles)
+  router.post('/utils/create-image-task', controller.utils.createImageTask)
+  router.get('/utils/image-task/:taskId', controller.utils.getImageTaskResult)
+  router.post('/utils/tts', controller.utils.tts)
   router.get('/pages/:idAndUuid', controller.utils.renderH5Page)
   router.get('/pexels/list', controller.utils.getPexelsList)
+  // 代理字节跳动TTS API
+  router.post('/tts/api/v1/tts', controller.utils.ttsProxy)
   router.post('/channel', controller.work.createChannel)
   router.get('/channel/getWorkChannels/:id', controller.work.getWorkChannel)
   router.patch('/channel/updateName/:id', controller.work.updateChannelName)

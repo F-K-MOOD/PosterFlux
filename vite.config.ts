@@ -1,32 +1,32 @@
-import vue from '@vitejs/plugin-vue'
-import { defineConfig } from 'vite'
-import { visualizer } from 'rollup-plugin-visualizer'
-import compressPlugin from 'vite-plugin-compression'
+import vue from "@vitejs/plugin-vue";
+import { visualizer } from "rollup-plugin-visualizer";
+import { defineConfig } from "vite";
+import compressPlugin from "vite-plugin-compression";
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
     visualizer({
-      filename: 'dist/stats.html',
+      filename: "dist/stats.html",
       open: true,
       gzipSize: true,
       brotliSize: true,
-      template: 'treemap',
+      template: "treemap",
       projectRoot: process.cwd(),
-      title: 'Bundle Analysis'
+      title: "Bundle Analysis",
     }),
     compressPlugin({
       verbose: true,
       disable: false,
       threshold: 10240,
-      algorithm: 'gzip',
-      ext: '.gz'
-    })
+      algorithm: "gzip",
+      ext: ".gz",
+    }),
   ],
   resolve: {
     alias: {
-      '@': '/src',
+      "@": "/src",
     },
   },
   build: {
@@ -35,24 +35,42 @@ export default defineConfig({
       output: {
         manualChunks: {
           // 核心框架
-          'vue-vendor': ['vue', 'vue-router', 'pinia'],
+          "vue-vendor": ["vue", "vue-router", "pinia"],
           // UI组件库
-          'ant-design': ['ant-design-vue', '@ant-design/icons-vue', '@ant-design-vue/use'],
+          "ant-design": [
+            "ant-design-vue",
+            "@ant-design/icons-vue",
+            "@ant-design-vue/use",
+          ],
           // 工具库
-          'utils': ['axios', 'lodash-es', 'uuid', 'qrcode', 'file-saver', 'array-move', 'hotkeys-js', 'path-to-regexp'],
+          utils: [
+            "axios",
+            "lodash-es",
+            "uuid",
+            "qrcode",
+            "file-saver",
+            "array-move",
+            "hotkeys-js",
+            "path-to-regexp",
+          ],
           // 其他依赖
-          'other': ['vuedraggable', 'lego-bricks', 'cropperjs', 'html2canvas']
-        }
-      }
-    }
+          other: ["vuedraggable", "lego-bricks", "cropperjs", "html2canvas"],
+        },
+      },
+    },
   },
   server: {
     port: 5173,
     proxy: {
-      '/api': {
-        target: 'http://localhost:7001',
+      "/api": {
+        target: "http://localhost:7001", // 更新为当前后端端口
         changeOrigin: true,
+      },
+      "/tts": {
+        target: "https://openspeech.bytedance.com",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/tts/, ""),
       },
     },
   },
-})
+});
