@@ -70,19 +70,14 @@ const handleImageLoad = () => {
   min-height: 150px;
 }
 
-.item-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 12px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
+.waterfall-item img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
 }
 
-.waterfall-item:hover .item-overlay {
-  opacity: 1;
+.item-overlay {
+  display: none;
 }
 
 .item-description {

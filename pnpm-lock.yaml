@@ -65,6 +65,9 @@ importers:
       npm:
         specifier: ^11.7.0
         version: 11.7.0
+      package:
+        specifier: 'link:'
+        version: 'link:'
       path-to-regexp:
         specifier: ^8.3.0
         version: 8.3.0
