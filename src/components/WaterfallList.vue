@@ -12,7 +12,6 @@ import {
 
 import {
   getImgElements,
-  getImgUrls,
   getMaxHeight,
   getMinHeight,
   getMinHeightColumn,
@@ -47,7 +46,6 @@ const pendingReflow = ref(false);
 const itemRefs = shallowRef<Array<HTMLElement | null>>([]);
 const MIN_ITEM_HEIGHT = 150;
 const imageLoadObserver = ref<ResizeObserver | null>(null);
-const imageLoadCount = ref(0);
 const isTransitionEnabled = ref(false);
 const newItemsStartIndex = ref(0);
 const showNewItems = ref(false);

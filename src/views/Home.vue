@@ -43,7 +43,7 @@
             y2="16.65" 
           />
         </svg>
-        <input type="text" placeholder="搜索历史对话/智能体">
+        <input type="text" placeholder="搜索历史对话/智能体" />
       </div>
 
       <!-- 功能列表 -->
@@ -218,83 +218,6 @@
             </div>
           </div>
         </div>
-        <div class="input-area">
-          <div class="input-tools">
-            <button class="tool-btn">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                <circle cx="8.5" cy="8.5" r="1.5" />
-                <polyline points="21 15 16 10 5 21" />
-              </svg>
-            </button>
-            <button class="tool-btn">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                <polyline points="22 4 12 14.01 9 11.01" />
-              </svg>
-            </button>
-            <button class="tool-btn">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path
-                  d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"
-                />
-                <polyline points="14 2 14 8 20 8" />
-                <line x1="16" y1="13" x2="8" y2="13" />
-                <line x1="16" y1="17" x2="8" y2="17" />
-                <polyline points="10 9 9 9 8 9" />
-              </svg>
-            </button>
-          </div>
-          <div class="input-container">
-            <input type="text" placeholder="输入你的问题..." >
-            <button class="send-btn">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <line x1="22" y1="2" x2="11" y2="13" />
-                <polygon points="22 2 15 22 11 13 2 9 22 2" />
-              </svg>
-            </button>
-          </div>
-          <div class="input-footer">
-            <span></span>
-            <span></span>
-          </div>
-        </div>
       </div>
 
       <!-- AI画图 -->
@@ -306,16 +229,27 @@
       </keep-alive>
 
       <!-- 其他功能占位 -->
-      <div v-if="currentView !== 'ai-image' && currentView !== 'ai-chat'" class="placeholder">
+      <div
+        v-if="currentView !== 'ai-image' && currentView !== 'ai-chat'"
+        class="placeholder"
+      >
         <p>「{{ getViewName(currentView) }}」功能正在开发中...</p>
       </div>
     </div>
+
+    <!-- AI对话输入组件 -->
+    <AiChatInput
+      :is-visible="currentView === 'ai-chat' || currentView === 'ai-image'"
+      :image-description="selectedImageDescription"
+      @send="handleSendMessage"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref } from "vue";
 
+import AiChatInput from "@/components/AiChatInput.vue";
 import AiImage from "@/views/AiImage/index.vue";
 
 const currentView = ref("ai-chat");
@@ -327,7 +261,18 @@ const switchView = (view: string) => {
 
 const handleImageClick = (item: any) => {
   selectedImageDescription.value = item.description;
-  currentView.value = "ai-chat";
+};
+
+const handleSendMessage = (message: string) => {
+  // 如果当前在AI画图视图，发送消息时切换到AI对话视图
+  if (currentView.value === "ai-image") {
+    currentView.value = "ai-chat";
+  }
+  // 这里可以处理发送消息的逻辑
+  console.log("发送消息:", message);
+  // 可以添加消息到对话列表等
+  // 清空描述词
+  selectedImageDescription.value = "";
 };
 
 const getViewName = (key: string) => {
@@ -348,6 +293,7 @@ const getViewName = (key: string) => {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+  position: relative;
 }
 
 /* 侧边栏 */
@@ -575,6 +521,7 @@ const getViewName = (key: string) => {
   max-width: calc(100vw - 320px);
   overflow: auto;
   box-sizing: border-box;
+  padding-bottom: 120px; /* 为固定定位的输入框留出空间 */
 }
 
 /* AI对话占位区 */
@@ -664,89 +611,6 @@ const getViewName = (key: string) => {
   color: #666;
 }
 
-/* 输入区域 */
-.input-area {
-  padding: 16px 24px;
-  background-color: white;
-  border-top: 1px solid #e0e0e0;
-  flex-shrink: 0;
-}
-
-.input-tools {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.tool-btn {
-  background: none;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  padding: 8px;
-  cursor: pointer;
-  color: #666;
-  transition: all 0.3s;
-}
-
-.tool-btn:hover {
-  border-color: #1890ff;
-  color: #1890ff;
-}
-
-.input-container {
-  display: flex;
-  align-items: flex-end;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.input-container input {
-  flex: 1;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 12px 16px;
-  font-size: 14px;
-  outline: none;
-  transition: all 0.3s;
-  min-height: 44px;
-  max-height: 120px;
-  overflow-y: auto;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.input-container input:focus {
-  border-color: #1890ff;
-  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
-}
-
-.send-btn {
-  width: 44px;
-  height: 44px;
-  border: none;
-  border-radius: 8px;
-  background-color: #1890ff;
-  color: white;
-  cursor: pointer;
-  transition: all 0.3s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.send-btn:hover {
-  background-color: #40a9ff;
-}
-
-.input-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 12px;
-  color: #999;
-}
-
 /* 占位提示 */
 .placeholder {
   display: flex;
@@ -762,14 +626,12 @@ const getViewName = (key: string) => {
 /* 滚动条样式 */
 .sidebar::-webkit-scrollbar,
 .chat-content::-webkit-scrollbar,
-.input-container input::-webkit-scrollbar,
 .content-area::-webkit-scrollbar {
   width: 6px;
 }
 
 .sidebar::-webkit-scrollbar-track,
 .chat-content::-webkit-scrollbar-track,
-.input-container input::-webkit-scrollbar-track,
 .content-area::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 3px;
@@ -777,7 +639,6 @@ const getViewName = (key: string) => {
 
 .sidebar::-webkit-scrollbar-thumb,
 .chat-content::-webkit-scrollbar-thumb,
-.input-container input::-webkit-scrollbar-thumb,
 .content-area::-webkit-scrollbar-thumb {
   background: #c1c1c1;
   border-radius: 3px;
@@ -785,7 +646,6 @@ const getViewName = (key: string) => {
 
 .sidebar::-webkit-scrollbar-thumb:hover,
 .chat-content::-webkit-scrollbar-thumb:hover,
-.input-container input::-webkit-scrollbar-thumb:hover,
 .content-area::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
 }

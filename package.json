@@ -44,7 +44,7 @@
     "lodash-es": "4.17.22",
     "mongoose": "^9.1.2",
     "npm": "^11.7.0",
-    "openai": "^6.16.0",
+    "package": "link:",
     "path-to-regexp": "^8.3.0",
     "pinia": "^3.0.4",
     "pinia-plugin-persistedstate": "^4.7.1",

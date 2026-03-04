@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref } from "vue";
 
 interface WaterfallItemProps {
   url: string;
@@ -12,8 +12,8 @@ const props = withDefaults(defineProps<WaterfallItemProps>(), {
 });
 
 const emit = defineEmits<{
-  (e: 'load'): void;
-  (e: 'error'): void;
+  (e: "load"): void;
+  (e: "error"): void;
 }>();
 
 const imageKey = computed(() => `img-${props.url}`);
@@ -24,14 +24,14 @@ const imageLoaded = ref(false);
 const handleImageError = () => {
   imageError.value = true;
   imageLoaded.value = false;
-  emit('error');
-  console.warn('图片加载失败:', props.url);
+  emit("error");
+  console.warn("图片加载失败:", props.url);
 };
 
 const handleImageLoad = () => {
   imageLoaded.value = true;
   imageError.value = false;
-  emit('load');
+  emit("load");
 };
 </script>
 
@@ -40,15 +40,15 @@ const handleImageLoad = () => {
     class="waterfall-item"
     :style="{ width: props.width ? `${props.width}px` : '100%' }"
   >
-    <img 
+    <img
+      v-show="!imageError"
       :key="imageKey"
-      v-lazy="props.url" 
+      v-lazy="props.url"
       :alt="props.description || '图片'"
       loading="lazy"
       @error="handleImageError"
       @load="handleImageLoad"
-      v-show="!imageError"
-    >
+    />
     <div v-if="imageError" class="image-error-placeholder">
       <span>图片加载失败</span>
     </div>
@@ -70,42 +70,14 @@ const handleImageLoad = () => {
   min-height: 150px;
 }
 
-.waterfall-item:hover .item-overlay {
-  opacity: 1;
-}
-
 .waterfall-item img {
-  display: block;
   width: 100%;
   height: auto;
   object-fit: cover;
-  transition: transform 0.3s ease-in-out;
-}
-
-.waterfall-item:hover img {
-  transform: scale(1.05);
-}
-
-.image-error-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 150px;
-  background-color: #f5f5f5;
-  color: #999;
-  font-size: 14px;
 }
 
 .item-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 12px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
+  display: none;
 }
 
 .item-description {
@@ -117,6 +89,5 @@ const handleImageLoad = () => {
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
 }
 </style>

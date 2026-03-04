@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { LoadingOutlined } from "@ant-design/icons-vue";
 import { useIntersectionObserver } from "@vueuse/core";
 import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 
