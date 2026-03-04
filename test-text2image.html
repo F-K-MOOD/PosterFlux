@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>文生图API测试</title>
+    <style>
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        line-height: 1.6;
+      }
+      .test-container {
+        background-color: #f9fafb;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+      }
+      input,
+      textarea {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+      textarea {
+        min-height: 100px;
+        resize: vertical;
+      }
+      button {
+        background-color: #10b981;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #059669;
+      }
+      .result {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: white;
+        border-radius: 4px;
+        border: 1px solid #e5e7eb;
+      }
+      .error {
+        color: #ef4444;
+      }
+      .success {
+        color: #10b981;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="test-container">
+      <h1>文生图API测试</h1>
+      <form id="test-form">
+        <div class="form-group">
+          <label for="api-key">API Key:</label>
+          <input
+            type="text"
+            id="api-key"
+            placeholder="请输入您的DASHSCOPE_API_KEY"
+          />
+        </div>
+        <div class="form-group">
+          <label for="prompt">提示词:</label>
+          <textarea id="prompt" placeholder="请输入文生图提示词">
+一副典雅庄重的对联悬挂于厅堂之中，房间是个安静古典的中式布置，桌子上放着一些青花瓷，对联上左书“义本生知人机同道善思新”，右书“通云赋智乾坤启数高志远”， 横批“智启通义”，字体飘逸，在中间挂着一幅中国风的画作，内容是岳阳楼。</textarea
+          >
+        </div>
+        <button type="submit">测试文生图API</button>
+      </form>
+      <div class="result" id="result">
+        <h2>结果:</h2>
+        <pre id="result-content">点击按钮开始测试...</pre>
+      </div>
+    </div>
+
+    <script>
+      document
+        .getElementById("test-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const apiKey = document.getElementById("api-key").value;
+          const prompt = document.getElementById("prompt").value;
+          const resultContent = document.getElementById("result-content");
+
+          resultContent.textContent = "正在发起请求...";
+
+          try {
+            // 测试同步文生图API
+            resultContent.textContent = "正在测试同步文生图API...";
+            const syncResponse = await fetch(
+              "https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${apiKey}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  model: "wanx-poster-generation-v1",
+                  input: {
+                    title: "春节快乐",
+                    sub_title: "家庭团聚，共享天伦之乐",
+                    body_text:
+                      "春节是中国最重要的传统节日之一，它象征着新的开始和希望",
+                    prompt_text_zh: prompt,
+                    wh_ratios: "竖版",
+                    lora_name: "童话油画",
+                    lora_weight: 0.8,
+                    ctrl_ratio: 0.7,
+                    ctrl_step: 0.7,
+                    generate_mode: "generate",
+                    generate_num: 1,
+                  },
+                  parameters: {},
+                }),
+              },
+            );
+
+            const syncResult = await syncResponse.json();
+            resultContent.innerHTML =
+              '<span class="success">同步API响应:</span><br>' +
+              JSON.stringify(syncResult, null, 2);
+
+            // 测试异步文生图API
+            resultContent.textContent += "\n\n正在测试异步文生图API...";
+            const asyncResponse = await fetch(
+              "https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${apiKey}`,
+                  "Content-Type": "application/json",
+                  "X-DashScope-Async": "enable",
+                },
+                body: JSON.stringify({
+                  model: "wanx-poster-generation-v1",
+                  input: {
+                    title: "春节快乐",
+                    sub_title: "家庭团聚，共享天伦之乐",
+                    body_text:
+                      "春节是中国最重要的传统节日之一，它象征着新的开始和希望",
+                    prompt_text_zh: prompt,
+                    wh_ratios: "竖版",
+                    lora_name: "童话油画",
+                    lora_weight: 0.8,
+                    ctrl_ratio: 0.7,
+                    ctrl_step: 0.7,
+                    generate_mode: "generate",
+                    generate_num: 1,
+                  },
+                  parameters: {},
+                }),
+              },
+            );
+
+            const asyncResult = await asyncResponse.json();
+            resultContent.innerHTML +=
+              '<br><br><span class="success">异步API响应:</span><br>' +
+              JSON.stringify(asyncResult, null, 2);
+          } catch (error) {
+            resultContent.innerHTML =
+              '<span class="error">错误:</span><br>' + error.message;
+            console.error("测试错误:", error);
+          }
+        });
+    </script>
+  </body>
+</html>

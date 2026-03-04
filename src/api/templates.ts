@@ -1,51 +1,29 @@
 import type { ComponentData } from '@/store/modules/editor/helper'
-import service from '@/utils/request'
+import {get,patch,post} from '@/utils/request'
 
 
-
-export function fetchTemplates(params: { title?: string; pageIndex: number; pageSize: number }) {
-  return service({
-    url: '/templates',
-    method: 'get',
-    params
-  })
+export function fetchTemplates(data: { title?: string; pageIndex: number; pageSize: number }) {
+  return get('/templates',data)
 }
 
 export function fetchTemplate(id: string) {
-  return service({
-    url: `/templates/${id}`,
-    method: 'get',
-  })
+  return get(`/templates/${id}`)
 }
 
-export function fetchWorks(params: { title?: string; status?: number; pageIndex: number; pageSize: number }) {
-  return service({
-    url: '/works',
-    method: 'get',
-    params
-  })
+export function fetchWorks(data: { title?: string; status?: number; pageIndex: number; pageSize: number }) {
+  return get('/works',data)
 }
 
 export function fetchWork(id: string) {
-  return service({
-    url: `/works/${id}`,
-    method: 'get',
-  })
+  return get(`/works/${id}`)
 }
 
-export function editorSaveWorkAPI(payload: { title?: string;coverImg?: string; desc?: string; content?: { props?: Record<string, any>; components?: ComponentData[] } }, id: string) {
-  return service({
-    url: `/works/${id}`,
-    method: 'patch',
-    data: payload
-  })
+export function editorSaveWorkAPI(data: { title?: string;coverImg?: string; desc?: string; content?: { props?: Record<string, any>; components?: ComponentData[] } }, id: string) {
+  return patch( `/works/${id}`,data)
 }
 
 export function publishWork(id: string) {
-  return service({
-    url: `/works/publish/${id}`,
-    method: 'post',
-  })
+  return post(`/works/publish/${id}`)
 }
 
 

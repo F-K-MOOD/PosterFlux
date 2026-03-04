@@ -1,4 +1,4 @@
-import axios, { type AxiosResponse } from 'axios'
+import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios'
 
 import useGlobalStore from '@/store/modules/global'
 
@@ -48,4 +48,32 @@ service.interceptors.response.use(
   },
 )
 
+// 柯力化函数，用于创建请求方法
+function createRequestMethod(method: string) {
+  return (url: string, data?: any, config?: AxiosRequestConfig) => {
+    const requestConfig: AxiosRequestConfig = {
+      ...config,
+      method,
+      url,
+    }
+    if (method.toUpperCase() === 'GET') {
+      requestConfig.params = data
+    } else {
+      requestConfig.data = data
+    }
+    return service(requestConfig)
+  }
+}
+
+// 创建 GET、POST、PUT、DELETE 请求方法
+const get = createRequestMethod('GET')
+const post = createRequestMethod('POST')
+const put = createRequestMethod('PUT')
+const del = createRequestMethod('DELETE')
+const patch = createRequestMethod('PATCH')
+
+
+
+
 export default service
+export { del, get, patch,post, put }

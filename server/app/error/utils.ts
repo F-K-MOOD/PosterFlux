@@ -14,5 +14,13 @@ export const utilsErrorMessages = {
   h5WorkNotExistError: {
     errno: 103004,
     message: '作品不存在'
+  },
+  paramError: {
+    errno: 103005,
+    message: '参数错误'
+  },
+  serverError: {
+    errno: 103006,
+    message: '服务器错误'
   }
 }

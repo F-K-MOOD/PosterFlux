@@ -1,4 +1,5 @@
 import { textDefaultProps } from 'lego-bricks'
+
 const defaultTextTemplates = [
   {
     text: '大标题',
@@ -37,4 +38,6 @@ const defaultTextTemplates = [
     position: 'absolute',
   }
 ]
-export default defaultTextTemplates.map(template => ({ ...textDefaultProps, ...template }))
+export default defaultTextTemplates.map(template => {
+  return { ...textDefaultProps, ...template }
+})

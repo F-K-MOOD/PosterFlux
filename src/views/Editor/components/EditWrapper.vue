@@ -25,6 +25,8 @@ function onItemClick(id: string) {
 }
 
 // !鼠标拖动元素移动实现
+// 添加动画帧ID存储
+let animationFrameId: number | null = null
 const editWrapperRef = ref<HTMLDivElement | null>(null)
 // 记录是否正在拖动元素
 let isDragging = false
@@ -36,6 +38,7 @@ const pointerOffsetInElement = {
 // 计算鼠标在元素内的偏移量
 function handleDragStart(e: MouseEvent) {
   if (!editWrapperRef.value) return
+  editWrapperRef.value.style.willChange = 'left, top'
   const { top, left } = editWrapperRef.value.getBoundingClientRect()
   // 鼠标在视口中的位置 - 元素在视口中的位置 = 鼠标相对于元素的偏移量
   pointerOffsetInElement.y = e.clientY - top; // (鼠标在元素内部，距顶部px)
@@ -54,31 +57,46 @@ function handleDragStart(e: MouseEvent) {
   }
   // 处理移动
   function handleMove(e: MouseEvent) {
-    if (!editWrapperRef.value) return
+    if (!editWrapperRef.value ) return
     isDragging = true
-    const { left, top } = calculateElementPosition(e)
-    editWrapperRef.value.style.left = `${left}px`
-    editWrapperRef.value.style.top = `${top}px`
+    // 取消之前计划的动画帧
+    if (animationFrameId !== null) {
+      cancelAnimationFrame(animationFrameId)
+    }
+    // 使用 requestAnimationFrame 安排下一次更新
+    animationFrameId = requestAnimationFrame(() => {
+      // 这里的代码只在浏览器准备重绘时执行
+      const { left, top } = calculateElementPosition(e)
+      applyStylesChanges(editWrapperRef.value!, { left, top })
+    })
   }
   // 处理鼠标移动松开
   function handleMouseUp() {
-      document.removeEventListener('mousemove', handleMove)
-      if (isDragging) {
-        emits('update-position', {
-          id: props.id,
-          left: editWrapperRef.value?.style.left,  //这里是带px单位的字符串
-          top: editWrapperRef.value?.style.top,  //这里是带px单位的字符串
-        })
-        // console.log('width', editWrapperRef.value?.style.width);  这里也是带px单位的
-        // console.log('height', editWrapperRef.value?.style.height); 这里也是带px单位的
-        isDragging = false
-      }
-      nextTick(() => {
-        document.removeEventListener('mouseup', handleMouseUp)
+    document.removeEventListener('mousemove', handleMove)
+      // 清理动画帧
+    if (animationFrameId !== null) {
+      cancelAnimationFrame(animationFrameId)
+      animationFrameId = null
+    }
+    // 移除 will-change
+    if (editWrapperRef.value) {
+      editWrapperRef.value.style.willChange = ''
+    }
+    if (isDragging) {
+      emits('update-position', {
+        id: props.id,
+        left: editWrapperRef.value?.style.left,  //这里是带px单位的字符串
+        top: editWrapperRef.value?.style.top,  //这里是带px单位的字符串
       })
+      // console.log('width', editWrapperRef.value?.style.width);  这里也是带px单位的
+      // console.log('height', editWrapperRef.value?.style.height); 这里也是带px单位的
+      isDragging = false
+    }
+    nextTick(() => {
+      document.removeEventListener('mouseup', handleMouseUp)
+    })
   }
   document.addEventListener('mousemove', handleMove)
-  // 鼠标松开时，移除移动事件
   document.addEventListener('mouseup', handleMouseUp)
 }
 
@@ -129,24 +147,41 @@ function calculateSize(direction: ResizeDirection, e: MouseEvent, positions: Ori
       break
   }
 }
+// 批量应用样式变化
+function applyStylesChanges(element: HTMLElement,styles: {width?: number, height?: number, left?: number, top?: number}) {
+  // 使用 CSS 变量或一次性设置多个样式
+  Object.assign(element.style, {
+    width: styles.width !== undefined ? `${styles.width}px` : '',
+    height: styles.height !== undefined ? `${styles.height}px` : '',  
+    left: styles.left !== undefined ? `${styles.left}px` : '',
+    top: styles.top !== undefined ? `${styles.top}px` : '',
+  })
+}
 function startResize(direction: ResizeDirection) {
   const currentElement = editWrapperRef.value as HTMLElement
+  let resizeAnimationId: number | null = null
   const { left, top, right, bottom } = currentElement.getBoundingClientRect()
   function handleMove(e: MouseEvent) {
-    const size = calculateSize(direction, e, { left, right, top, bottom })
-    if(size) {
-      currentElement.style.width = `${size.width}px`
-      currentElement.style.height = `${size.height}px`
-      if(size.left !== undefined) {
-        currentElement.style.left = `${size.left}px`
-      }
-      if(size.top !== undefined) {
-        currentElement.style.top = `${size.top}px`
-      }
+    // 取消之前计划的动画帧
+    if (resizeAnimationId !== null) {
+      cancelAnimationFrame(resizeAnimationId)
     }
+    
+    currentElement.style.willChange = 'width, height, left, top'
+    // 使用 requestAnimationFrame 节流
+    resizeAnimationId = requestAnimationFrame(() => {
+      const styles = calculateSize(direction, e, { left, right, top, bottom })
+      if (styles) {
+        // ⭐ 关键优化：批量更新样式 ⭐
+        applyStylesChanges(currentElement, styles)
+      }
+    })
+    
   }
   function handleMouseUp(e: MouseEvent) {
     document.removeEventListener('mousemove', handleMove)
+    // 移除 will-change
+    currentElement.style.willChange = ''
     const size = calculateSize(direction, e, { left, right, top, bottom })
     emits('update-position', { ...size, id: props.id })
     nextTick(() => {

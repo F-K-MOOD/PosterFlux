@@ -84,14 +84,14 @@ const handleChange = (e: { key: string; value: any }) => {
 
 <template>
   <div class="edit-groups">
-    <Collapse v-model:activeKey="currentKey">
-      <CollapsePanel 
+    <ACollapse v-model:activeKey="currentKey">
+      <ACollapsePanel 
         v-for="(ediGroup, index) in editGroups" 
         :key="`group-${index}`" 
         :header="ediGroup.text"
       >
         <PropsTable :props="ediGroup.props" @change="handleChange" />
-      </CollapsePanel>
-    </Collapse>
+      </ACollapsePanel>
+    </ACollapse>
   </div>
 </template>

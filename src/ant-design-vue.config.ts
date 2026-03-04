@@ -32,7 +32,7 @@ import {
   Tabs,
   Tag,
   Textarea,
-  Tooltip
+  Tooltip,
 } from 'ant-design-vue'
 import type { App } from 'vue'
 
@@ -70,7 +70,7 @@ const components = [
   Tabs,
   Tag,
   Textarea,
-  Tooltip
+  Tooltip,
 ]
 
 export default {

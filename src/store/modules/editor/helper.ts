@@ -27,21 +27,21 @@ export interface EditorProps {
   workId?: string;
 }
 export interface ComponentData {
-  // 这个元素的 属性，
-  props: Partial<AllComponentProps>;
   // id，uuid v4 生成
   id: string;
   // 业务组件库名称 l-text，l-image 等等 
   name: string;
+  // 这个元素的 属性，
+  props: Partial<AllComponentProps>;
   page?: PageData;
+  // 图层名称
+  // 是否是根组件
+  isRoot?: boolean;
+  layerName?: string;
   // 图层是否隐藏
   isHidden?: boolean;
   // 图层是否锁定
   isLocked?: boolean;
-  // 图层名称
-  layerName?: string;
-  // 是否是根组件
-  isRoot?: boolean;
 }
 export interface HistoryRecord {
   id: string;

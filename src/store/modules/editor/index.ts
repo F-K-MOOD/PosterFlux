@@ -37,7 +37,7 @@ export const useEditorStore = defineStore('editor', () => {
   // 物料区添加物料   添加历史记录
   function addComponent(props: ComponentData) {
     const newComponent: ComponentData = {
-      id: uuidv4(),
+      id: props.id,
       name: props.name,
       props: {
         ...props.props
